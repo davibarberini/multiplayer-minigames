@@ -1,0 +1,262 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #282a36; /* Dracula Background */
+  color: #f8f8f2; /* Dracula Foreground */
+}
+
+h1,
+h2,
+h3 {
+  color: #bd93f9; /* Dracula Purple */
+  border-bottom: 1px solid #44475a; /* Dracula Current Line */
+  padding-bottom: 5px;
+}
+
+#lobby-selection,
+#in-lobby {
+  background-color: #44475a; /* Dracula Current Line */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  border: 1px solid #6272a4; /* Dracula Comment */
+}
+
+.hidden {
+  display: none;
+}
+
+#lobby-list {
+  list-style: none;
+  padding: 0;
+}
+
+#lobby-list li {
+  border: 1px solid #6272a4; /* Dracula Comment */
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #282a36; /* Dracula Background */
+  border-radius: 4px;
+  color: #f8f8f2; /* Dracula Foreground */
+}
+
+#lobby-list li span {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 15px;
+  background-color: #bd93f9; /* Dracula Purple */
+  color: #f8f8f2; /* Dracula Foreground */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 5px;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #ff79c6; /* Dracula Pink */
+}
+
+button:disabled {
+  background-color: #6272a4; /* Dracula Comment */
+  cursor: not-allowed;
+}
+
+#refresh-lobbies {
+  margin-bottom: 10px;
+  background-color: #8be9fd; /* Dracula Cyan */
+}
+
+#refresh-lobbies:hover {
+  background-color: #a4ffff; /* Lighter Cyan */
+}
+
+#create-lobby-btn,
+#join-lobby-btn {
+  background-color: #50fa7b; /* Dracula Green */
+}
+
+#create-lobby-btn:hover,
+#join-lobby-btn:hover {
+  background-color: #8cffaa; /* Lighter Green */
+}
+
+#leave-lobby-btn {
+  background-color: #ffb86c; /* Dracula Orange */
+}
+
+#leave-lobby-btn:hover {
+  background-color: #ffca8f; /* Lighter Orange */
+}
+
+#start-game-btn {
+  background-color: #ff79c6; /* Dracula Pink */
+}
+
+#start-game-btn:hover:not(:disabled) {
+  background-color: #ff9fdf; /* Lighter Pink */
+}
+
+input[type="text"] {
+  padding: 10px;
+  border: 1px solid #6272a4; /* Dracula Comment */
+  border-radius: 4px;
+  margin-right: 5px;
+  background-color: #282a36; /* Dracula Background */
+  color: #f8f8f2; /* Dracula Foreground */
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #bd93f9; /* Dracula Purple */
+  box-shadow: 0 0 5px #bd93f9;
+}
+
+label {
+  margin-right: 5px;
+  color: #8be9fd; /* Dracula Cyan */
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: #44475a; /* Dracula Current Line */
+  margin: 20px 0;
+}
+
+#player-list {
+  list-style: none;
+  padding: 0;
+}
+
+#player-list li {
+  padding: 8px 0;
+  color: #f8f8f2; /* Dracula Foreground */
+  border-bottom: 1px dashed #6272a4; /* Dracula Comment */
+}
+
+#player-list li:last-child {
+  border-bottom: none;
+}
+
+#player-list li strong {
+  color: #50fa7b; /* Dracula Green */
+}
+
+.error {
+  color: #ff5555; /* Dracula Red */
+  font-weight: bold;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: rgba(255, 85, 85, 0.1); /* Transparent Red */
+  border: 1px solid #ff5555; /* Dracula Red */
+  border-radius: 4px;
+}
+
+#connection-status {
+  font-style: italic;
+  color: #6272a4; /* Dracula Comment */
+  margin-bottom: 15px;
+}
+
+/* Basic Responsiveness */
+@media (max-width: 600px) {
+  body {
+    margin: 10px;
+  }
+  #lobby-selection,
+  #in-lobby,
+  #name-entry div,
+  #game-area {
+    padding: 15px;
+  }
+  h1 {
+    font-size: 1.8em;
+  }
+  h2 {
+    font-size: 1.4em;
+  }
+  input[type="text"],
+  button,
+  select {
+    font-size: 0.95em;
+    padding: 8px 12px;
+    width: calc(100% - 30px); /* Adjust width for smaller screens */
+    margin-bottom: 10px; /* Add spacing */
+  }
+  label {
+    display: block; /* Stack labels above inputs */
+    margin-bottom: 5px;
+  }
+  #name-entry div,
+  #lobby-selection div,
+  #lobby-selection hr {
+    /* Improve spacing */
+    margin-bottom: 15px;
+  }
+  #lobby-list li {
+    flex-direction: column; /* Stack lobby info and join button */
+    align-items: flex-start;
+  }
+  #lobby-list li button {
+    width: auto; /* Don't force full width */
+    margin-top: 8px;
+  }
+}
+
+/* Game Area Styling */
+#game-area {
+  background-color: #44475a; /* Dracula Current Line */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  border: 1px solid #6272a4; /* Dracula Comment */
+  color: #f8f8f2; /* Dracula Foreground */
+}
+
+#game-area h2,
+#game-area h3 {
+  color: #ffb86c; /* Dracula Orange for game titles */
+  border-bottom-color: #6272a4;
+}
+
+#clicker-button {
+  padding: 20px 40px;
+  font-size: 1.5em;
+  background-color: #50fa7b; /* Dracula Green */
+  margin: 20px 0;
+  display: block; /* Center it */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#clicker-button:hover {
+  background-color: #8cffaa;
+}
+
+#clicker-scores {
+  list-style: none;
+  padding: 0;
+}
+
+#clicker-scores li {
+  padding: 5px;
+  border-bottom: 1px dashed #6272a4;
+}
+
+#leave-game-btn {
+  margin-top: 20px;
+  background-color: #ff5555; /* Dracula Red */
+}
+#leave-game-btn:hover {
+  background-color: #ff8080;
+}

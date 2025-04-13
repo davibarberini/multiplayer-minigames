@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space Duel - Lobby</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>Space Duel Lobby</h1>
+
+    <div id="name-entry">
+      <label for="player-name-input">Your Name:</label>
+      <input type="text" id="player-name-input" placeholder="Enter your name" />
+      <button id="connect-btn">Connect</button>
+    </div>
+
+    <div id="connection-status" class="hidden">Connecting...</div>
+
+    <div id="lobby-selection" class="hidden">
+      <h2>Available Lobbies</h2>
+      <button id="refresh-lobbies">Refresh List</button>
+      <ul id="lobby-list"></ul>
+
+      <hr />
+
+      <h2>Create Lobby</h2>
+      <div>
+        <label for="game-type-select">Game:</label>
+        <select id="game-type-select">
+          <!-- Options will be populated by JavaScript -->
+          <option value="">-- Select Game --</option>
+        </select>
+      </div>
+      <div>
+        <label for="lobby-name-input">Lobby Name (Optional):</label>
+        <input
+          type="text"
+          id="lobby-name-input"
+          placeholder="My Awesome Game"
+        />
+      </div>
+      <button id="create-lobby-btn">Create Lobby</button>
+
+      <hr />
+
+      <h2>Join Lobby</h2>
+      <label for="lobby-code-input">Lobby Code:</label>
+      <input type="text" id="lobby-code-input" placeholder="Enter code" />
+      <button id="join-lobby-btn">Join Lobby</button>
+    </div>
+
+    <div id="in-lobby" class="hidden">
+      <h2 id="lobby-title"></h2>
+      <p>Game: <strong id="game-type-display"></strong></p>
+      <p>Lobby Code: <strong id="lobby-code-display"></strong></p>
+      <h3>
+        Players: (<span id="player-count-display">0</span>/<span
+          id="max-players-display"
+          >0</span
+        >)
+      </h3>
+      <ul id="player-list"></ul>
+      <p id="lobby-status"></p>
+      <button id="leave-lobby-btn">Leave Lobby</button>
+      <!-- Add Leave button later -->
+      <button id="start-game-btn" class="hidden">Start Game</button>
+      <!-- Only host sees this -->
+    </div>
+
+    <div id="error-message" class="error"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
