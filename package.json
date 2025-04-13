@@ -2,5 +2,9 @@
   "name": "space-duel",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "setup": "cd server && yarn build && yarn start",
+    "install": "cd server && yarn install"
+  }
 }
