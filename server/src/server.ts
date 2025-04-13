@@ -6,6 +6,9 @@ import path from "path"; // Import path module
 import GameManager from "./game_manager";
 import { PlayerWebSocket, PlayerInfo, GameDefinition, Lobby } from "./types";
 
+//Port Config
+const PORT = process.env.PORT || 8080;
+
 // --- HTTP Server Setup ---
 const httpServer = http.createServer((req, res) => {
   // Determine file path based on request URL
@@ -91,7 +94,7 @@ const availableGames: AvailableGamesMap = {
   spaceDuel: { name: "Space Duel", minPlayers: 2, maxPlayers: 2 },
 };
 
-console.log("WebSocket server started on port 8080");
+console.log("WebSocket server started on port " + PORT);
 
 wss.on("connection", (ws: WebSocket) => {
   // Type assertion to add our custom property
@@ -547,7 +550,6 @@ function sendError(ws: PlayerWebSocket, message: string): void {
 }
 
 // --- Start the HTTP Server ---
-const PORT = process.env.PORT || 8080;
 httpServer.listen(PORT, () => {
   console.log(
     `HTTP server started on port ${PORT}. WebSocket server is attached.`
