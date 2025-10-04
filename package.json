@@ -1,0 +1,23 @@
+{
+  "name": "multiplayer-minigames",
+  "version": "1.0.0",
+  "description": "A real-time multiplayer mini-games platform",
+  "private": true,
+  "scripts": {
+    "install:all": "cd minigames-backend && yarn install && cd ../minigames-frontend && yarn install",
+    "dev:backend": "cd minigames-backend && yarn dev",
+    "dev:frontend": "cd minigames-frontend && yarn dev",
+    "build:backend": "cd minigames-backend && yarn build",
+    "build:frontend": "cd minigames-frontend && yarn build",
+    "build:all": "yarn build:backend && yarn build:frontend"
+  },
+  "keywords": [
+    "multiplayer",
+    "games",
+    "websocket",
+    "react",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}
