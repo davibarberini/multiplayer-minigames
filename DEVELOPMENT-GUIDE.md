@@ -126,6 +126,91 @@ Client                     Server
 }
 ```
 
+#### Never Use `any` Type
+
+**Rule**: Always avoid using the `any` type. It defeats the purpose of TypeScript's type safety.
+
+**Alternatives to `any`:**
+
+1. **Use `unknown`** for values with truly unknown types that require runtime checking:
+
+```typescript
+// ❌ Bad
+function processData(data: any) {
+  return data.value;
+}
+
+// ✅ Good
+function processData(data: unknown) {
+  if (typeof data === "object" && data !== null && "value" in data) {
+    return (data as { value: string }).value;
+  }
+  throw new Error("Invalid data");
+}
+```
+
+2. **Define proper interfaces** for object structures:
+
+```typescript
+// ❌ Bad
+const gameState: any = { status: "ready", score: 0 };
+
+// ✅ Good
+interface GameState {
+  status: string;
+  score: number;
+}
+const gameState: GameState = { status: "ready", score: 0 };
+```
+
+3. **Use generic types** for flexible but type-safe code:
+
+```typescript
+// ❌ Bad
+function getFirst(arr: any[]): any {
+  return arr[0];
+}
+
+// ✅ Good
+function getFirst<T>(arr: T[]): T | undefined {
+  return arr[0];
+}
+```
+
+4. **Use union types** for multiple possible types:
+
+```typescript
+// ❌ Bad
+function formatValue(value: any): string {
+  return String(value);
+}
+
+// ✅ Good
+function formatValue(value: string | number | boolean): string {
+  return String(value);
+}
+```
+
+5. **Use index signatures** for dynamic object keys:
+
+```typescript
+// ❌ Bad
+const stats: any = {};
+
+// ✅ Good
+const stats: Record<string, number> = {};
+// or
+const stats: { [key: string]: number } = {};
+```
+
+**Only Exception**: When interfacing with third-party libraries that have incorrect or missing types, you may use `any` with an explicit ESLint disable comment explaining why:
+
+```typescript
+// Type assertion needed due to Socket.IO's dynamic typing
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(this.socket.emit as any)(event, ...args);
+```
+
 #### Define Clear Types
 
 ```typescript
@@ -873,6 +958,85 @@ DEBUG=socket.io:* npm run dev
 
 ---
 
+## Updating Project Documentation
+
+### When to Update PROJECT-SPEC.md
+
+**Always update the PROJECT-SPEC.md when making**:
+
+1. **Architecture Changes**
+
+   - Adding new communication patterns (e.g., new Socket.IO events)
+   - Changing data flow or state management approach
+   - Modifying server/client responsibilities
+   - Introducing new architectural layers or patterns
+
+2. **Feature Additions**
+
+   - New user-facing features (e.g., lobby list, spectator mode)
+   - New game modes or gameplay mechanics
+   - Additional configuration options
+   - New user interactions or flows
+
+3. **API/Interface Changes**
+
+   - New or modified Socket.IO events
+   - Changes to shared types/interfaces
+   - Database schema modifications
+   - External API integrations
+
+4. **Requirement Changes**
+   - Modified technical requirements
+   - New dependencies or tools
+   - Changes to MVP scope
+   - Updated success metrics
+
+### How to Update PROJECT-SPEC.md
+
+1. **Document the Change**: Add a clear description in the relevant section
+2. **Update Diagrams**: Modify any affected flow diagrams or architecture visuals
+3. **Update Examples**: Include code examples if relevant
+4. **Track in Changelog**: Optionally maintain a changelog section
+5. **Review Dependencies**: Check if other sections need updates
+
+### Example Update Process
+
+```markdown
+## Recent Changes
+
+### [Date] - Feature: Public Lobby List
+
+**Added:**
+
+- New "Lobby List" feature allowing users to browse public lobbies
+- Privacy toggle for lobby hosts (Private/Public)
+- New events: `get_public_lobbies`, `toggle_lobby_privacy`
+
+**Modified:**
+
+- Lobby interface to include privacy status
+- Landing page to include "Browse Lobbies" option
+
+**Files Changed:**
+
+- `shared/types/events.ts`
+- `minigames-backend/src/managers/lobby-manager.ts`
+- `minigames-frontend/src/components/LobbyList.tsx` (new)
+```
+
+### Quick Checklist
+
+Before committing major changes:
+
+- [ ] Updated PROJECT-SPEC.md with new features/architecture
+- [ ] Updated DEVELOPMENT-GUIDE.md with new patterns/practices
+- [ ] Updated README.md if user-facing changes
+- [ ] Added code examples for new patterns
+- [ ] Updated type definitions and interfaces
+- [ ] Verified all documentation is consistent
+
+---
+
 ## Resources
 
 - [Socket.IO Documentation](https://socket.io/docs/)
@@ -883,3 +1047,5 @@ DEBUG=socket.io:* npm run dev
 ---
 
 **Remember**: Start simple, test often, and iterate. Build one working mini-game before adding complexity!
+
+**Document as you go**: Keep PROJECT-SPEC.md updated to maintain a single source of truth for the project's architecture and features.

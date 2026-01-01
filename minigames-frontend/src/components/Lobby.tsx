@@ -6,6 +6,7 @@ interface LobbyProps {
   currentPlayerId: string;
   onStartGame: () => void;
   onLeaveLobby: () => void;
+  onTogglePrivacy: (isPrivate: boolean) => void;
 }
 
 export function Lobby({
@@ -13,6 +14,7 @@ export function Lobby({
   currentPlayerId,
   onStartGame,
   onLeaveLobby,
+  onTogglePrivacy,
 }: LobbyProps) {
   const isHost = lobby.hostId === currentPlayerId;
   const canStart = lobby.players.length >= 2;
@@ -42,6 +44,21 @@ export function Lobby({
             <span className="info-label">Points to Win:</span>
             <span className="info-value">{lobby.config.pointsToWin}</span>
           </div>
+          {isHost && (
+            <div className="info-item privacy-toggle">
+              <span className="info-label">
+                {lobby.config.isPrivate ? "🔒 Private" : "🌐 Public"}
+              </span>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={!lobby.config.isPrivate}
+                  onChange={(e) => onTogglePrivacy(!e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+          )}
         </div>
 
         <div className="players-section">

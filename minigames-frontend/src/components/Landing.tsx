@@ -5,10 +5,16 @@ import "./Landing.css";
 interface LandingProps {
   onCreateLobby: (username: string, color: string) => void;
   onJoinLobby: (code: string, username: string, color: string) => void;
+  onBrowseLobbies: () => void;
   error: string | null;
 }
 
-export function Landing({ onCreateLobby, onJoinLobby, error }: LandingProps) {
+export function Landing({
+  onCreateLobby,
+  onJoinLobby,
+  onBrowseLobbies,
+  error,
+}: LandingProps) {
   const [username, setUsername] = useState("");
   const [selectedColor, setSelectedColor] = useState<
     (typeof PLAYER_COLORS)[number]
@@ -46,13 +52,16 @@ export function Landing({ onCreateLobby, onJoinLobby, error }: LandingProps) {
               className="mode-button create"
               onClick={() => setMode("create")}
             >
-              Create Lobby
+              🎯 Create Lobby
             </button>
             <button
               className="mode-button join"
               onClick={() => setMode("join")}
             >
-              Join Lobby
+              🔑 Join with Code
+            </button>
+            <button className="mode-button browse" onClick={onBrowseLobbies}>
+              🌐 Browse Public Lobbies
             </button>
           </div>
         </div>

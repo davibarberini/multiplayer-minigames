@@ -132,6 +132,20 @@ class LobbyManager {
     this.lobbies.delete(code);
   }
 
+  getPublicLobbies(): Lobby[] {
+    return Array.from(this.lobbies.values()).filter(
+      (lobby) => !lobby.config.isPrivate && lobby.status === "waiting"
+    );
+  }
+
+  toggleLobbyPrivacy(code: string, isPrivate: boolean): Lobby | null {
+    const lobby = this.lobbies.get(code);
+    if (!lobby) return null;
+
+    lobby.config.isPrivate = isPrivate;
+    return lobby;
+  }
+
   private generateCode(): string {
     let code: string;
     do {

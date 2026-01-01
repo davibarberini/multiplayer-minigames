@@ -3,6 +3,7 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
   RoundResult,
+  RoundEndResult,
 } from "../../shared/types";
 import { lobbyManager } from "./managers/lobby-manager";
 import { gameManager } from "./managers/game-manager";
@@ -77,6 +78,53 @@ export function setupEventHandlers(
     // Leave lobby
     socket.on("leave_lobby", () => {
       handlePlayerLeave(socket, io);
+    });
+
+    // Get public lobbies
+    socket.on("get_public_lobbies", () => {
+      try {
+        const publicLobbies = lobbyManager.getPublicLobbies();
+        socket.emit("public_lobbies", publicLobbies);
+      } catch (error) {
+        socket.emit("error", { message: "Failed to get public lobbies" });
+      }
+    });
+
+    // Toggle lobby privacy
+    socket.on("toggle_lobby_privacy", (isPrivate) => {
+      try {
+        const lobbyCode = getLobbyCodeForSocket(socket);
+        if (!lobbyCode) {
+          socket.emit("error", { message: "Not in a lobby" });
+          return;
+        }
+
+        const lobby = lobbyManager.getLobby(lobbyCode);
+        if (!lobby) {
+          socket.emit("error", { message: "Lobby not found" });
+          return;
+        }
+
+        if (lobby.hostId !== socket.id) {
+          socket.emit("error", { message: "Only host can change privacy" });
+          return;
+        }
+
+        const updatedLobby = lobbyManager.toggleLobbyPrivacy(
+          lobbyCode,
+          isPrivate
+        );
+        if (updatedLobby) {
+          io.to(lobbyCode).emit("lobby_updated", updatedLobby);
+          console.log(
+            `Lobby ${lobbyCode} privacy set to ${
+              isPrivate ? "private" : "public"
+            }`
+          );
+        }
+      } catch (error) {
+        socket.emit("error", { message: "Failed to toggle lobby privacy" });
+      }
     });
 
     // Start game
@@ -238,7 +286,7 @@ function startGameLoop(
 
 function handleRoundEnd(
   lobbyCode: string,
-  roundResult: any,
+  roundResult: RoundEndResult,
   io: Server<ClientToServerEvents, ServerToClientEvents>
 ) {
   const lobby = lobbyManager.getLobby(lobbyCode);

@@ -24,6 +24,8 @@ class SocketService {
     ...args: Parameters<ClientToServerEvents[K]>
   ) {
     if (this.socket) {
+      // Type assertion needed due to Socket.IO's dynamic typing
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (this.socket.emit as any)(event, ...args);
     }
   }
@@ -32,6 +34,8 @@ class SocketService {
     event: K,
     handler: ServerToClientEvents[K]
   ) {
+    // Type assertion needed due to Socket.IO's event handler typing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.socket?.on(event, handler as any);
   }
 
@@ -39,6 +43,8 @@ class SocketService {
     event: K,
     handler?: ServerToClientEvents[K]
   ) {
+    // Type assertion needed due to Socket.IO's event handler typing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.socket?.off(event, handler as any);
   }
 

@@ -20,6 +20,12 @@ export function RoundResult({
   const winner = players.find((p) => p.id === result.winnerId);
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
+  // Type guard for responses
+  const responses = result.stats.responses as
+    | Record<string, number>
+    | undefined;
+  const hasResponses = responses && typeof responses === "object";
+
   return (
     <div className="round-result-overlay">
       <div className="round-result-card">
@@ -41,11 +47,9 @@ export function RoundResult({
 
         <div className="round-stats">
           <h3>Round Stats</h3>
-          {result.stats.responses && (
+          {hasResponses && (
             <div className="response-times">
-              {Object.entries(
-                result.stats.responses as Record<string, number>
-              ).map(([playerId, time]) => {
+              {Object.entries(responses).map(([playerId, time]) => {
                 const player = players.find((p) => p.id === playerId);
                 if (!player) return null;
 

@@ -1,4 +1,10 @@
-import { MiniGameEngine, Player, RoundEndResult } from "../../../shared/types";
+import {
+  MiniGameEngine,
+  Player,
+  RoundEndResult,
+  GameAction,
+  GameState,
+} from "../../../shared/types";
 
 class GameManager {
   private activeGames = new Map<string, MiniGameEngine>(); // key: lobby code
@@ -16,14 +22,14 @@ class GameManager {
     return this.activeGames.get(lobbyCode);
   }
 
-  handleAction(lobbyCode: string, playerId: string, action: any): void {
+  handleAction(lobbyCode: string, playerId: string, action: GameAction): void {
     const game = this.activeGames.get(lobbyCode);
     if (game) {
       game.handleAction(playerId, action);
     }
   }
 
-  getGameState(lobbyCode: string): any {
+  getGameState(lobbyCode: string): GameState | null {
     const game = this.activeGames.get(lobbyCode);
     return game ? game.getState() : null;
   }

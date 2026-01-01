@@ -23,14 +23,50 @@ A web-based multiplayer mini-games platform where players can create lobbies, jo
 - Lobby displays all connected players
 - Real-time updates when players join/leave
 
-### 2. User Profile System
+### 2. Public Lobby List
+
+#### Browsing Public Lobbies
+
+- Users can view a list of all public lobbies with enhanced visual design
+- **High contrast UI** for better readability:
+  - White lobby cards with gradient borders on hover
+  - Large, gradient-styled lobby codes
+  - Color-coded badges for player count
+  - Distinct info cards with shadows
+- List shows:
+  - Lobby code (gradient text, 1.8rem)
+  - Current player count / Max players (badge style)
+  - Game mode (in highlighted card)
+  - Points to win configuration
+  - Player avatars (first 4 players + overflow indicator)
+- Real-time updates when lobbies are created/deleted
+- **Direct join with modal**:
+  - Click "Join Lobby" opens modal
+  - Modal collects username and color
+  - No need to return to landing page
+  - Form validation and color picker
+  - Smooth user experience
+
+#### Privacy Settings
+
+- **Private Lobbies** (default):
+  - Only accessible via join code
+  - Not visible in public lobby list
+  - Ideal for playing with friends
+- **Public Lobbies**:
+  - Visible in the lobby list for all users
+  - Anyone can join (until full)
+  - Host can toggle between private/public at any time
+  - Visual indicator (🔒 Private / 🌐 Public) shows current status
+
+### 3. User Profile System
 
 Each user must configure:
 
 - **Username**: Unique identifier within the lobby
 - **Color**: Visual identifier (choose from preset palette or custom)
 
-### 3. Game Selection
+### 4. Game Selection
 
 #### In-Lobby Game Selection
 
@@ -47,7 +83,7 @@ Each user must configure:
 - Ensures no players are forced into spectator mode
 - Cycles through available games
 
-### 4. Player Management
+### 5. Player Management
 
 #### Spectator Mode
 
@@ -58,7 +94,7 @@ Each user must configure:
   - See scores and leaderboard
   - Rejoin as active player when slot opens
 
-### 5. Lobby Configuration
+### 6. Lobby Configuration
 
 Host can configure:
 
@@ -67,7 +103,7 @@ Host can configure:
 - **Max Players**: Optional lobby capacity limit
 - **Private/Public**: Whether lobby appears in public lobby list
 
-### 6. Scoring System
+### 7. Scoring System
 
 #### Round-Based Scoring
 
@@ -241,29 +277,63 @@ interface MiniGame {
 
 ## MVP (Phase 1) Scope
 
-To get started quickly, implement:
-
-### Essential Features
+### Completed Features ✅
 
 - ✅ Create lobby with code
 - ✅ Join lobby with code
 - ✅ Set username and color
 - ✅ Basic lobby UI with player list
 - ✅ Host can start game
-- ✅ One simple mini-game (e.g., Reaction Time)
-- ✅ Round scoring (first to 3 points)
+- ✅ One simple mini-game (Reaction Time)
+- ✅ Round scoring (first to N points)
 - ✅ Victory screen
 - ✅ Return to lobby
+- ✅ **Public lobby list** - Browse and view public lobbies
+- ✅ **Privacy toggle** - Hosts can set lobby to private or public
 
-### Deferred Features (Phase 2+)
+### Phase 2 Features (In Development)
+
+- ✅ **Enhanced lobby list with direct join** - Completed
+  - Modal-based username/color collection
+  - No need to return to landing
+- 🚧 Multiple mini-games
+- 🚧 Random game mode
+
+### Phase 3+ Features (Planned)
 
 - ⏸️ Spectator mode
-- ⏸️ Random game mode
-- ⏸️ Multiple mini-games
-- ⏸️ Public lobby list
 - ⏸️ Persistent stats/history
-- ⏸️ Matchmaking
+- ⏸️ Matchmaking system
 - ⏸️ Chat system
+- ⏸️ Replay system
+
+---
+
+## Recent Changes
+
+### [October 2025] - Enhanced Public Lobby List UI & Direct Join
+
+**Added:**
+
+- Modal-based join flow from lobby list (username + color collection)
+- Enhanced visual design for lobby cards with high contrast
+- Improved readability with white cards, gradient accents
+- Direct join functionality without returning to landing page
+
+**Modified:**
+
+- `LobbyList.tsx`: Added join modal with form and color picker
+- `LobbyList.css`: Complete visual redesign with better contrast
+- `Landing.css`: Added distinct styling for Browse button
+- `App.tsx`: Implemented `handleJoinFromList` function
+
+**UI Improvements:**
+
+- Lobby codes now use gradient text for visual appeal
+- Player count badges with colored background
+- Info cards with subtle shadows and spacing
+- Join buttons with gradient and hover effects
+- Modal overlay with backdrop blur
 
 ---
 
@@ -282,6 +352,7 @@ To get started quickly, implement:
 - Intuitive game controls
 - Clear feedback on all actions
 - Smooth state transitions
+- **High contrast UI for accessibility**
 
 ---
 

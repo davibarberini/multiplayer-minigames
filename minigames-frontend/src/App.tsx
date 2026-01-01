@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { useSocket } from "./hooks/useSocket";
 import { socketService } from "./services/socket";
 import { Landing } from "./components/Landing";
 import { Lobby } from "./components/Lobby";
-import { ReactionTime } from "./games/ReactionTime";
+import { LobbyList } from "./components/LobbyList";
+import { ReactionTime } from "./games/reaction-time";
+import { WouldYouRather } from "./games/would-you-rather";
 import { RoundResult } from "./components/RoundResult";
 import { Victory } from "./components/Victory";
 import "./App.css";
 
 function App() {
+  const [showLobbyList, setShowLobbyList] = useState(false);
   const {
     connected,
     lobby,
@@ -16,15 +20,32 @@ function App() {
     roundResult,
     gameWinner,
     error,
+    publicLobbies,
     createLobby,
     joinLobby,
     leaveLobby,
     startGame,
     sendGameAction,
     requestNextRound,
+    getPublicLobbies,
+    toggleLobbyPrivacy,
   } = useSocket();
 
   const currentPlayerId = socketService.getSocket()?.id || "";
+
+  const handleBrowseLobbies = () => {
+    getPublicLobbies();
+    setShowLobbyList(true);
+  };
+
+  const handleJoinFromList = (
+    code: string,
+    username: string,
+    color: string
+  ) => {
+    joinLobby(code, username, color);
+    setShowLobbyList(false);
+  };
 
   // Show victory screen if game ended
   if (gameWinner && lobby) {
@@ -54,10 +75,25 @@ function App() {
 
   // Show game if in progress
   if (gameData && gameState && lobby?.status === "in_game") {
-    // For now, we only have Reaction Time game
     if (gameData.gameId === "reaction_time") {
       return <ReactionTime gameState={gameState} onAction={sendGameAction} />;
     }
+    if (gameData.gameId === "would_you_rather") {
+      return (
+        <WouldYouRather gameState={gameState} onAction={sendGameAction} />
+      );
+    }
+  }
+
+  // Show lobby list if browsing
+  if (showLobbyList && !lobby) {
+    return (
+      <LobbyList
+        lobbies={publicLobbies}
+        onJoinLobby={handleJoinFromList}
+        onBack={() => setShowLobbyList(false)}
+      />
+    );
   }
 
   // Show lobby if created/joined
@@ -68,6 +104,7 @@ function App() {
         currentPlayerId={currentPlayerId}
         onStartGame={startGame}
         onLeaveLobby={leaveLobby}
+        onTogglePrivacy={toggleLobbyPrivacy}
       />
     );
   }
@@ -81,6 +118,7 @@ function App() {
       <Landing
         onCreateLobby={createLobby}
         onJoinLobby={joinLobby}
+        onBrowseLobbies={handleBrowseLobbies}
         error={error}
       />
     </div>

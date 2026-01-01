@@ -3,6 +3,8 @@ import {
   MiniGameConfig,
   RoundEndResult,
   Player,
+  GameAction,
+  GameState,
 } from "../../../shared/types";
 
 const config: MiniGameConfig = {
@@ -49,7 +51,7 @@ export class ReactionTimeGame implements MiniGameEngine {
     }, delay);
   }
 
-  handleAction(playerId: string, action: any): void {
+  handleAction(playerId: string, action: GameAction): void {
     if (action.type !== "click") return;
 
     // If clicked before green
@@ -66,7 +68,7 @@ export class ReactionTimeGame implements MiniGameEngine {
     this.state.responses.set(playerId, responseTime);
   }
 
-  getState(): any {
+  getState(): GameState {
     return {
       status: this.state.status,
       responses: Array.from(this.state.responses.entries()),

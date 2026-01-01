@@ -6,6 +6,7 @@ import type {
   GameStartData,
   RoundResult,
   MiniGameConfig,
+  GameAction,
 } from "../../../shared/types";
 
 const SERVER_URL =
@@ -13,13 +14,14 @@ const SERVER_URL =
 
 export function useSocket() {
   const [lobby, setLobby] = useState<Lobby | null>(null);
-  const [gameState, setGameState] = useState<any>(null);
+  const [gameState, setGameState] = useState<unknown>(null);
   const [gameData, setGameData] = useState<GameStartData | null>(null);
   const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
   const [gameWinner, setGameWinner] = useState<Player | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [availableGames, setAvailableGames] = useState<MiniGameConfig[]>([]);
+  const [publicLobbies, setPublicLobbies] = useState<Lobby[]>([]);
 
   useEffect(() => {
     const socket = socketService.connect(SERVER_URL);
@@ -37,6 +39,10 @@ export function useSocket() {
 
     socket.on("available_games", (games) => {
       setAvailableGames(games);
+    });
+
+    socket.on("public_lobbies", (lobbies) => {
+      setPublicLobbies(lobbies);
     });
 
     socket.on("lobby_created", (lobbyData) => {
@@ -67,6 +73,11 @@ export function useSocket() {
       setRoundResult(null);
       setGameWinner(null);
       setError(null);
+
+      // Update lobby status to in_game
+      setLobby((prevLobby) =>
+        prevLobby ? { ...prevLobby, status: "in_game" } : null
+      );
     });
 
     socket.on("game_state_update", (state) => {
@@ -121,7 +132,7 @@ export function useSocket() {
     socketService.emit("start_game");
   }, []);
 
-  const sendGameAction = useCallback((action: any) => {
+  const sendGameAction = useCallback((action: GameAction) => {
     socketService.emit("game_action", action);
   }, []);
 
@@ -129,6 +140,14 @@ export function useSocket() {
     socketService.emit("request_next_round");
     setRoundResult(null);
     setGameState(null);
+  }, []);
+
+  const getPublicLobbies = useCallback(() => {
+    socketService.emit("get_public_lobbies");
+  }, []);
+
+  const toggleLobbyPrivacy = useCallback((isPrivate: boolean) => {
+    socketService.emit("toggle_lobby_privacy", isPrivate);
   }, []);
 
   return {
@@ -140,11 +159,14 @@ export function useSocket() {
     gameWinner,
     error,
     availableGames,
+    publicLobbies,
     createLobby,
     joinLobby,
     leaveLobby,
     startGame,
     sendGameAction,
     requestNextRound,
+    getPublicLobbies,
+    toggleLobbyPrivacy,
   };
 }

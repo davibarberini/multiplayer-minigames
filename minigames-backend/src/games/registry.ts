@@ -1,10 +1,12 @@
 import { ReactionTimeGame } from "./reaction-time";
+import { WouldYouRatherGame } from "./would-you-rather";
 import { MiniGameEngine, Player, MiniGameConfig } from "../../../shared/types";
 
 type GameConstructor = new () => MiniGameEngine;
 
 export const GAME_REGISTRY: Record<string, GameConstructor> = {
   reaction_time: ReactionTimeGame,
+  would_you_rather: WouldYouRatherGame,
 };
 
 export function getAvailableGames(): MiniGameConfig[] {
