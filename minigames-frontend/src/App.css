@@ -25,3 +25,28 @@
     opacity: 1;
   }
 }
+
+.game-session {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.end-session-button {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #c62828;
+  border: 2px solid #ffcdd2;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.end-session-button:hover {
+  background: #ffebee;
+}

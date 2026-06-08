@@ -57,6 +57,12 @@ export function useSocket() {
 
     socket.on("lobby_updated", (lobbyData) => {
       setLobby(lobbyData);
+      if (lobbyData.status === "waiting") {
+        setGameData(null);
+        setGameState(null);
+        setRoundResult(null);
+        setGameWinner(null);
+      }
     });
 
     socket.on("player_joined", (player) => {
@@ -150,6 +156,18 @@ export function useSocket() {
     socketService.emit("toggle_lobby_privacy", isPrivate);
   }, []);
 
+  const updateSelectedGames = useCallback((gameIds: string[]) => {
+    socketService.emit("update_selected_games", gameIds);
+  }, []);
+
+  const endSession = useCallback(() => {
+    socketService.emit("end_session");
+    setGameData(null);
+    setGameState(null);
+    setRoundResult(null);
+    setGameWinner(null);
+  }, []);
+
   return {
     connected,
     lobby,
@@ -168,5 +186,7 @@ export function useSocket() {
     requestNextRound,
     getPublicLobbies,
     toggleLobbyPrivacy,
+    updateSelectedGames,
+    endSession,
   };
 }

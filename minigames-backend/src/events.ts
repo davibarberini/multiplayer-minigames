@@ -127,6 +127,44 @@ export function setupEventHandlers(
       }
     });
 
+    // Update selected games (host only, lobby waiting)
+    socket.on("update_selected_games", (gameIds) => {
+      try {
+        const lobbyCode = getLobbyCodeForSocket(socket);
+        if (!lobbyCode) {
+          socket.emit("error", { message: "Not in a lobby" });
+          return;
+        }
+
+        const lobby = lobbyManager.getLobby(lobbyCode);
+        if (!lobby) {
+          socket.emit("error", { message: "Lobby not found" });
+          return;
+        }
+
+        if (lobby.hostId !== socket.id) {
+          socket.emit("error", { message: "Only host can update games" });
+          return;
+        }
+
+        if (lobby.status !== "waiting") {
+          socket.emit("error", { message: "Cannot change games during a session" });
+          return;
+        }
+
+        const updatedLobby = lobbyManager.updateSelectedGames(lobbyCode, gameIds);
+        if (!updatedLobby) {
+          socket.emit("error", { message: "Select at least one valid game" });
+          return;
+        }
+
+        io.to(lobbyCode).emit("lobby_updated", updatedLobby);
+      } catch (error) {
+        console.error("Error updating selected games:", error);
+        socket.emit("error", { message: "Failed to update selected games" });
+      }
+    });
+
     // Start game
     socket.on("start_game", () => {
       try {
@@ -152,21 +190,12 @@ export function setupEventHandlers(
           return;
         }
 
-        // Create and start game
-        const game = createGame(lobby.config.gameMode as string, lobby.players);
-        gameManager.startGame(lobbyCode, game, lobby.players);
-        lobbyManager.updateLobbyStatus(lobbyCode, "in_game");
+        if (lobby.config.selectedGames.length === 0) {
+          socket.emit("error", { message: "Select at least one game" });
+          return;
+        }
 
-        // Notify all players
-        io.to(lobbyCode).emit("game_started", {
-          gameId: game.config.id,
-          gameName: game.config.name,
-          players: lobby.players,
-        });
-
-        // Start game state update loop
-        startGameLoop(lobbyCode, io);
-
+        startRound(lobbyCode, io);
         console.log(`Game started in lobby: ${lobbyCode}`);
       } catch (error) {
         console.error("Error starting game:", error);
@@ -201,24 +230,28 @@ export function setupEventHandlers(
         const lobby = lobbyManager.getLobby(lobbyCode);
         if (!lobby || lobby.hostId !== socket.id) return;
 
-        // Reset game for next round
-        gameManager.resetGame(lobbyCode);
-        const game = gameManager.getGame(lobbyCode);
-        if (game) {
-          game.initialize(lobby.players);
-          lobbyManager.updateLobbyStatus(lobbyCode, "in_game");
-
-          // Notify players
-          io.to(lobbyCode).emit("game_started", {
-            gameId: game.config.id,
-            gameName: game.config.name,
-            players: lobby.players,
-          });
-
-          startGameLoop(lobbyCode, io);
-        }
+        startRound(lobbyCode, io);
       } catch (error) {
         console.error("Error starting next round:", error);
+      }
+    });
+
+    // End session and return to lobby (host only)
+    socket.on("end_session", () => {
+      try {
+        const lobbyCode = getLobbyCodeForSocket(socket);
+        if (!lobbyCode) return;
+
+        const lobby = lobbyManager.getLobby(lobbyCode);
+        if (!lobby || lobby.hostId !== socket.id) return;
+
+        gameManager.endGame(lobbyCode);
+        const updatedLobby = lobbyManager.endSession(lobbyCode);
+        if (updatedLobby) {
+          io.to(lobbyCode).emit("lobby_updated", updatedLobby);
+        }
+      } catch (error) {
+        console.error("Error ending session:", error);
       }
     });
 
@@ -228,6 +261,34 @@ export function setupEventHandlers(
       handlePlayerLeave(socket, io);
     });
   });
+}
+
+function startRound(
+  lobbyCode: string,
+  io: Server<ClientToServerEvents, ServerToClientEvents>
+): void {
+  const lobby = lobbyManager.getLobby(lobbyCode);
+  if (!lobby) {
+    throw new Error("Lobby not found");
+  }
+
+  const gameId = lobbyManager.pickNextGameId(lobbyCode);
+  if (!gameId) {
+    throw new Error("No game available for round");
+  }
+
+  const game = createGame(gameId, lobby.players);
+  gameManager.startGame(lobbyCode, game, lobby.players);
+  lobbyManager.updateLobbyStatus(lobbyCode, "in_game");
+  lobbyManager.setCurrentGame(lobbyCode, gameId);
+
+  io.to(lobbyCode).emit("game_started", {
+    gameId: game.config.id,
+    gameName: game.config.name,
+    players: lobby.players,
+  });
+
+  startGameLoop(lobbyCode, io);
 }
 
 function getLobbyCodeForSocket(socket: TypedSocket): string | null {
@@ -320,6 +381,8 @@ function handleRoundEnd(
 
     io.to(lobbyCode).emit("game_ended", winner, finalScores);
     gameManager.endGame(lobbyCode);
+    lobbyManager.clearRotationPool(lobbyCode);
+    lobbyManager.setCurrentGame(lobbyCode, undefined);
 
     // Reset scores for potential rematch
     setTimeout(() => {

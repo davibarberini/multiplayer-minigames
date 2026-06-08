@@ -14,6 +14,8 @@ export interface ClientToServerEvents {
   start_game: () => void;
   game_action: (action: GameAction) => void;
   request_next_round: () => void;
+  update_selected_games: (gameIds: string[]) => void;
+  end_session: () => void;
   get_public_lobbies: () => void;
   toggle_lobby_privacy: (isPrivate: boolean) => void;
 }

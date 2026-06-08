@@ -119,7 +119,10 @@ export function LobbyList({ lobbies, onJoinLobby, onBack }: LobbyListProps) {
                 <div className="lobby-item-info">
                   <div className="info-row">
                     <span className="info-label">Game:</span>
-                    <span className="info-value">{lobby.config.gameMode}</span>
+                    <span className="info-value">
+                      {lobby.config.selectedGames.length} game
+                      {lobby.config.selectedGames.length !== 1 ? "s" : ""}
+                    </span>
                   </div>
                   <div className="info-row">
                     <span className="info-label">Points to Win:</span>

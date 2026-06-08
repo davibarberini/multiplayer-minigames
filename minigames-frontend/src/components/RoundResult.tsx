@@ -9,6 +9,7 @@ interface RoundResultProps {
   players: Player[];
   isHost: boolean;
   onNextRound: () => void;
+  onEndSession: () => void;
 }
 
 export function RoundResult({
@@ -16,6 +17,7 @@ export function RoundResult({
   players,
   isHost,
   onNextRound,
+  onEndSession,
 }: RoundResultProps) {
   const winner = players.find((p) => p.id === result.winnerId);
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
@@ -88,9 +90,14 @@ export function RoundResult({
         </div>
 
         {isHost && (
-          <button className="next-round-button" onClick={onNextRound}>
-            Next Round
-          </button>
+          <div className="host-round-actions">
+            <button className="next-round-button" onClick={onNextRound}>
+              Next Round
+            </button>
+            <button className="end-session-button-card" onClick={onEndSession}>
+              Back to Lobby
+            </button>
+          </div>
         )}
 
         {!isHost && (

@@ -6,6 +6,7 @@ import { Lobby } from "./components/Lobby";
 import { LobbyList } from "./components/LobbyList";
 import { ReactionTime } from "./games/reaction-time";
 import { WouldYouRather } from "./games/would-you-rather";
+import { HigherLower } from "./games/higher-lower";
 import { RoundResult } from "./components/RoundResult";
 import { Victory } from "./components/Victory";
 import "./App.css";
@@ -29,6 +30,9 @@ function App() {
     requestNextRound,
     getPublicLobbies,
     toggleLobbyPrivacy,
+    availableGames,
+    updateSelectedGames,
+    endSession,
   } = useSocket();
 
   const currentPlayerId = socketService.getSocket()?.id || "";
@@ -69,18 +73,40 @@ function App() {
         players={lobby.players}
         isHost={isHost}
         onNextRound={requestNextRound}
+        onEndSession={endSession}
       />
     );
   }
 
   // Show game if in progress
   if (gameData && gameState && lobby?.status === "in_game") {
-    if (gameData.gameId === "reaction_time") {
-      return <ReactionTime gameState={gameState} onAction={sendGameAction} />;
-    }
-    if (gameData.gameId === "would_you_rather") {
+    const isHost = lobby.hostId === currentPlayerId;
+
+    const gameView = (() => {
+      if (gameData.gameId === "reaction_time") {
+        return <ReactionTime gameState={gameState} onAction={sendGameAction} />;
+      }
+      if (gameData.gameId === "would_you_rather") {
+        return (
+          <WouldYouRather gameState={gameState} onAction={sendGameAction} />
+        );
+      }
+      if (gameData.gameId === "higher_lower") {
+        return <HigherLower gameState={gameState} onAction={sendGameAction} />;
+      }
+      return null;
+    })();
+
+    if (gameView) {
       return (
-        <WouldYouRather gameState={gameState} onAction={sendGameAction} />
+        <div className="game-session">
+          {isHost && (
+            <button className="end-session-button" onClick={endSession}>
+              Back to Lobby
+            </button>
+          )}
+          {gameView}
+        </div>
       );
     }
   }
@@ -102,9 +128,11 @@ function App() {
       <Lobby
         lobby={lobby}
         currentPlayerId={currentPlayerId}
+        availableGames={availableGames}
         onStartGame={startGame}
         onLeaveLobby={leaveLobby}
         onTogglePrivacy={toggleLobbyPrivacy}
+        onUpdateSelectedGames={updateSelectedGames}
       />
     );
   }
