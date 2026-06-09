@@ -1,0 +1,148 @@
+# 🎮 Jogos pra Criar (Backlog)
+
+Lista de mini-jogos planejados para implementar neste repositório. Cada entrada é uma
+"especificação leve" de uma ideia de jogo, pronta para virar código seguindo o
+`DEVELOPMENT-GUIDE.md`.
+
+> Este arquivo serve de **fila de trabalho** para o comando `/criar-da-lista`, que lê a próxima
+> entrada com status `🔲 a fazer`, implementa o jogo e **move** a entrada para `jogos-feitos.md`
+> (para não poluir esta fila).
+
+---
+
+## Como usar
+
+1. Adicione uma nova ideia copiando o **Template** abaixo.
+2. Preencha todos os campos (quanto mais completo, menos o agente precisa "adivinhar").
+3. Use `id` em `snake_case` (ex.: `trivia_quiz`) — é o `gameId` usado no `GAME_REGISTRY`,
+   no `App.tsx` e no nome das pastas.
+4. Mantenha o `status` atualizado conforme o jogo avança.
+
+### Legenda de status
+- 🔲 **a fazer** — ainda não implementado
+- 🚧 **em progresso** — sendo implementado
+- ✅ **feito** — implementado e registrado (backend + frontend)
+- ❌ **descartado** — decidimos não fazer
+
+### Legenda de complexidade
+- ⭐ Baixa · ⭐⭐ Média · ⭐⭐⭐ Alta (ex.: precisa validação de palavras, banco de dados grande)
+
+---
+
+## Template (copie para criar uma nova ideia)
+
+```markdown
+### <Nome do Jogo>
+- **id:** `snake_case_id`
+- **status:** 🔲 a fazer
+- **prioridade:** alta | média | baixa
+- **jogadores:** min X / max Y
+- **duração estimada:** Z segundos (vira `estimatedDuration` no config)
+- **complexidade:** ⭐ / ⭐⭐ / ⭐⭐⭐
+
+**Como funciona (regras):**
+- (passo a passo da jogabilidade, do começo ao fim de uma ronda)
+
+**Por que encaixa nos critérios (GAME-IDEAS.md):**
+- (tolerante a delay? multiplayer? ronda curta? fácil de entender?)
+
+**Ações do jogador (`GameAction`):**
+- `type: "..."` → payload: `...` (o que o cliente envia ao servidor)
+
+**Lógica do servidor (`MiniGameEngine`):**
+- Estado: (o que o servidor guarda por ronda — ex.: respostas, votos, tempos)
+- Fim de ronda (`checkRoundEnd`): (quando termina e como)
+- Pontuação / vencedor: (como o ponto é atribuído — sempre server-side)
+- Edge cases: (desconexão, timeout, ação fora de hora, empate)
+
+**UI / telas (frontend):**
+- (estados visuais: ex.: "votando", "resultado"; o que mostrar em cada um)
+
+**Dados necessários:**
+- (ex.: banco de perguntas, lista de palavras, categorias — onde colocar)
+
+**Notas:**
+- (qualquer detalhe extra, inspirações, variações futuras)
+```
+
+---
+
+## Fila de jogos
+
+### Trivia Quiz
+- **id:** `trivia_quiz`
+- **status:** 🔲 a fazer
+- **prioridade:** alta
+- **jogadores:** min 2 / max 8
+- **duração estimada:** 90 segundos
+- **complexidade:** ⭐⭐
+
+**Como funciona (regras):**
+- Uma pergunta de múltipla escolha aparece para todos.
+- Cada jogador tem 10-15s para escolher uma alternativa.
+- Resposta correta = 1 ponto; quem acerta mais rápido ganha pontos extras.
+- Após o tempo, mostra a resposta certa e a contagem de pontos da ronda.
+
+**Por que encaixa nos critérios (GAME-IDEAS.md):**
+- Todos têm o mesmo tempo, então delay de rede não prejudica ninguém.
+- Funciona bem com vários jogadores e a ronda é curta.
+
+**Ações do jogador (`GameAction`):**
+- `type: "answer"` → payload: índice da alternativa escolhida (ex.: `0..3`).
+
+**Lógica do servidor (`MiniGameEngine`):**
+- Estado: pergunta atual, alternativas, índice correto, respostas por jogador (com timestamp).
+- Fim de ronda (`checkRoundEnd`): quando todos responderam OU o tempo acabou.
+- Pontuação / vencedor: acerto = 1 ponto + bônus por velocidade; vencedor da ronda = maior pontuação.
+- Edge cases: jogador que não responde fica com 0; ignorar respostas após o tempo; desconexão não trava a ronda.
+
+**UI / telas (frontend):**
+- Estado "perguntando": enunciado + alternativas clicáveis + contador regressivo.
+- Estado "resultado": destaca a alternativa correta e mostra quem acertou.
+
+**Dados necessários:**
+- Banco de perguntas (enunciado, alternativas, índice correto). Sugestão: array constante no
+  arquivo do jogo no backend (como o `QUESTIONS` de `would-you-rather.ts`).
+
+**Notas:**
+- Dá pra expandir com categorias e níveis de dificuldade depois.
+
+---
+
+### Number Guessing
+- **id:** `number_guessing`
+- **status:** 🔲 a fazer
+- **prioridade:** média
+- **jogadores:** min 2 / max 8
+- **duração estimada:** 60 segundos
+- **complexidade:** ⭐
+
+**Como funciona (regras):**
+- O servidor sorteia um número secreto (ex.: 1-100).
+- Jogadores enviam palpites; o servidor responde "maior" ou "menor" para cada palpite.
+- Quem acertar o número primeiro ganha a ronda.
+
+**Por que encaixa nos critérios (GAME-IDEAS.md):**
+- Delay não afeta (cada palpite é avaliado individualmente); regra simples; ronda rápida.
+
+**Ações do jogador (`GameAction`):**
+- `type: "guess"` → payload: número do palpite.
+
+**Lógica do servidor (`MiniGameEngine`):**
+- Estado: número secreto, histórico de palpites por jogador, flag de vencedor.
+- Fim de ronda (`checkRoundEnd`): quando alguém acerta OU o tempo acaba (ninguém pontua se ninguém acertar).
+- Pontuação / vencedor: primeiro a acertar recebe o ponto.
+- Edge cases: ignorar palpites fora do intervalo; desconexão remove o jogador da ronda.
+
+**UI / telas (frontend):**
+- Campo de input para palpite + feedback "maior/menor" + histórico dos próprios palpites.
+
+**Dados necessários:**
+- Nenhum (número gerado aleatoriamente no servidor).
+
+**Notas:**
+- Variação: revelar palpites dos outros jogadores para criar tensão.
+
+---
+
+<!-- Adicione novas ideias abaixo usando o Template -->
