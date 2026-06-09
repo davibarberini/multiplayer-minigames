@@ -4,12 +4,12 @@
   "description": "A real-time multiplayer mini-games platform",
   "private": true,
   "scripts": {
-    "install:all": "cd minigames-backend && yarn install && cd ../minigames-frontend && yarn install",
-    "dev:backend": "cd minigames-backend && yarn dev",
-    "dev:frontend": "cd minigames-frontend && yarn dev",
-    "build:backend": "cd minigames-backend && yarn build",
-    "build:frontend": "cd minigames-frontend && yarn build",
-    "build:all": "yarn build:backend && yarn build:frontend"
+    "install:all": "pnpm -C minigames-backend install && pnpm -C minigames-frontend install",
+    "dev:backend": "pnpm -C minigames-backend dev",
+    "dev:frontend": "pnpm -C minigames-frontend dev",
+    "build:backend": "pnpm -C minigames-backend build",
+    "build:frontend": "pnpm -C minigames-frontend build",
+    "build:all": "pnpm build:backend && pnpm build:frontend"
   },
   "keywords": [
     "multiplayer",

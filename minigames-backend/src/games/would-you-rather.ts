@@ -153,10 +153,11 @@ export class WouldYouRatherGame implements MiniGameEngine {
     if (this.state.status === "ended") {
       // If there are winners, pick one randomly (or first)
       // If tie, pick first player as fallback
+      const results = this.state.results;
       const winnerId =
-        this.state.results?.winners.length > 0
-          ? this.state.results.winners[
-              Math.floor(Math.random() * this.state.results.winners.length)
+        results && results.winners.length > 0
+          ? results.winners[
+              Math.floor(Math.random() * results.winners.length)
             ]
           : this.players[0]?.id || "";
 

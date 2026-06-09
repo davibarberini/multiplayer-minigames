@@ -15,67 +15,66 @@
 
 ## Project Setup
 
-### Recommended Project Structure
+### Actual Project Structure
+
+This is a pnpm-based monorepo. The folders are `minigames-frontend/`, `minigames-backend/`,
+and `shared/` (note: not `client/`/`server/`).
 
 ```
 multiplayer-minigames/
-├── client/                 # Frontend application
+├── minigames-frontend/     # Frontend application (React + Vite)
 │   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── games/         # Mini-game implementations
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── services/      # API and Socket.IO service
-│   │   ├── types/         # TypeScript type definitions
-│   │   ├── utils/         # Helper functions
+│   │   ├── assets/
+│   │   ├── components/     # Reusable UI components (Lobby, Landing, etc.)
+│   │   ├── games/          # Mini-game UI components (one folder per game)
+│   │   ├── hooks/          # Custom React hooks (useSocket)
+│   │   ├── services/       # Socket.IO service
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   ├── package.json
 │   └── vite.config.ts
 │
-├── server/                # Backend application
+├── minigames-backend/      # Backend application (Node.js + Socket.IO)
 │   ├── src/
-│   │   ├── games/         # Game logic (server-side)
-│   │   ├── managers/      # Lobby and game managers
-│   │   ├── types/         # TypeScript type definitions
-│   │   ├── utils/         # Helper functions
-│   │   ├── events.ts      # Socket.IO event handlers
-│   │   └── index.ts       # Entry point
+│   │   ├── games/          # Game logic (server-side) + registry.ts
+│   │   ├── managers/       # Lobby and game managers
+│   │   ├── events.ts       # Socket.IO event handlers
+│   │   └── index.ts        # Entry point
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── shared/                # Shared code between client/server
-│   ├── types/             # Common type definitions
-│   ├── constants/         # Shared constants
-│   └── validators/        # Shared validation logic
+├── shared/                 # Shared code (imported via relative paths)
+│   ├── types/              # Common type definitions (player, lobby, game, events)
+│   └── constants/          # Shared constants (colors, game)
 │
+├── .cursor/                # Cursor rules & commands (AI-assisted workflows)
+│   ├── rules/
+│   └── commands/
+│
+├── package.json            # Root scripts (install/dev/build orchestration)
 ├── PROJECT-SPEC.md
 ├── DEVELOPMENT-GUIDE.md
 └── README.md
 ```
 
-### Initial Setup Commands
+> Types/constants from `shared/` are imported with relative paths, e.g.
+> `import { MiniGameEngine } from "../../../shared/types";`. There is no `shared/validators/`
+> folder yet, and the backend reads its types from `shared/` (no `minigames-backend/src/types/`).
+
+### Setup Commands
+
+The project already exists, so day-to-day setup just installs dependencies via the root scripts.
 
 ```bash
-# Create project structure
-mkdir -p client/src/{components,games,hooks,services,types,utils}
-mkdir -p server/src/{games,managers,types,utils}
-mkdir -p shared/{types,constants,validators}
+# Install all dependencies (backend + frontend) from the repo root
+pnpm install:all
 
-# Initialize client (React + TypeScript + Vite)
-cd client
-npm create vite@latest . -- --template react-ts
-npm install socket.io-client
-npm install -D @types/node
+# Run the apps in two terminals
+pnpm dev:backend     # nodemon + ts-node, backend on :3001
+pnpm dev:frontend    # Vite dev server
 
-# Initialize server (Node.js + TypeScript)
-cd ../server
-npm init -y
-npm install express socket.io cors
-npm install -D typescript @types/node @types/express @types/cors ts-node nodemon
-npx tsc --init
-
-# Update server tsconfig.json
-# Set: "target": "ES2022", "module": "commonjs", "outDir": "./dist"
+# Build everything
+pnpm build:all       # build:backend (tsc) + build:frontend (tsc -b && vite build)
 ```
 
 ---
@@ -234,7 +233,7 @@ export interface Lobby {
 
 export interface LobbyConfig {
   pointsToWin: number;
-  gameMode: string | "random";
+  selectedGames: string[];
   maxPlayers?: number;
   isPrivate: boolean;
 }
@@ -310,43 +309,64 @@ export class Lobby extends React.Component {
 
 ### Step-by-Step Guide
 
-#### 1. Define Game Interface (First Time Only)
+#### 1. Game Interface (Already Defined)
+
+The shared game interface already exists in `shared/types/game.ts`. New games must implement it
+as-is — no `any` is used anywhere:
 
 ```typescript
-// shared/types/game.ts
+// shared/types/game.ts (existing)
 export interface MiniGameConfig {
   id: string;
   name: string;
   description: string;
   minPlayers: number;
   maxPlayers: number;
+  estimatedDuration: number; // in seconds
+}
+
+// Generic game state - games can have different state structures
+export interface GameState {
+  status: string;
+  [key: string]: unknown;
+}
+
+export interface GameStats {
+  [key: string]: unknown;
+}
+
+export interface GameAction {
+  type: string;
+  payload?: unknown;
+}
+
+export interface RoundEndResult {
+  winnerId: string;
+  stats: GameStats;
 }
 
 export interface MiniGameEngine {
   config: MiniGameConfig;
   initialize(players: Player[]): void;
-  handleAction(playerId: string, action: any): void;
-  getState(): any;
+  handleAction(playerId: string, action: GameAction): void;
+  getState(): GameState;
   checkRoundEnd(): RoundEndResult | null;
   reset(): void;
-}
-
-export interface RoundEndResult {
-  winnerId: string;
-  stats: Record<string, any>;
 }
 ```
 
 #### 2. Create Server-Side Game Logic
 
 ```typescript
-// server/src/games/reaction-time.ts
+// minigames-backend/src/games/reaction-time.ts
 import {
   MiniGameEngine,
   MiniGameConfig,
   RoundEndResult,
   Player,
-} from "../../../shared/types/game";
+  GameAction,
+  GameState,
+} from "../../../shared/types";
 
 const config: MiniGameConfig = {
   id: "reaction_time",
@@ -354,6 +374,7 @@ const config: MiniGameConfig = {
   description: "Click as fast as you can when the screen turns green!",
   minPlayers: 2,
   maxPlayers: 8,
+  estimatedDuration: 15,
 };
 
 interface ReactionTimeState {
@@ -391,7 +412,7 @@ export class ReactionTimeGame implements MiniGameEngine {
     }, delay);
   }
 
-  handleAction(playerId: string, action: any): void {
+  handleAction(playerId: string, action: GameAction): void {
     if (action.type !== "click") return;
     if (this.state.status !== "green") {
       // Clicked too early - penalize
@@ -404,7 +425,7 @@ export class ReactionTimeGame implements MiniGameEngine {
     this.state.responses.set(playerId, responseTime);
   }
 
-  getState(): any {
+  getState(): GameState {
     return {
       status: this.state.status,
       responses: Array.from(this.state.responses.entries()),
@@ -459,24 +480,30 @@ export class ReactionTimeGame implements MiniGameEngine {
 #### 3. Register Game
 
 ```typescript
-// server/src/games/registry.ts
+// minigames-backend/src/games/registry.ts
 import { ReactionTimeGame } from "./reaction-time";
-// Import other games...
+import { WouldYouRatherGame } from "./would-you-rather";
+import { MiniGameEngine, Player, MiniGameConfig } from "../../../shared/types";
 
-export const GAME_REGISTRY = {
+type GameConstructor = new () => MiniGameEngine;
+
+export const GAME_REGISTRY: Record<string, GameConstructor> = {
   reaction_time: ReactionTimeGame,
+  would_you_rather: WouldYouRatherGame,
   // Add more games here
 };
 
-export function getAvailableGames() {
+export function getAvailableGames(): MiniGameConfig[] {
   return Object.values(GAME_REGISTRY).map(
     (GameClass) => new GameClass().config
   );
 }
 
-export function createGame(gameId: string, players: Player[]) {
+export function createGame(gameId: string, players: Player[]): MiniGameEngine {
   const GameClass = GAME_REGISTRY[gameId];
-  if (!GameClass) throw new Error(`Game ${gameId} not found`);
+  if (!GameClass) {
+    throw new Error(`Game ${gameId} not found`);
+  }
 
   const game = new GameClass();
   game.initialize(players);
@@ -486,27 +513,38 @@ export function createGame(gameId: string, players: Player[]) {
 
 #### 4. Create Client-Side Component
 
-```typescript
-// client/src/games/ReactionTime.tsx
-import React, { useEffect, useState } from "react";
-import { useSocket } from "../hooks/useSocket";
+Each game lives in its own folder: `minigames-frontend/src/games/<game-id>/index.tsx`
+(plus a `styles.css`). Components receive `gameState` (typed as `unknown`, then narrowed
+to the game's own state interface) and an `onAction` callback — they do NOT call `useSocket`
+directly.
 
-interface ReactionTimeProps {
-  gameState: any;
+```typescript
+// minigames-frontend/src/games/reaction-time/index.tsx
+import { useState } from "react";
+import type { GameAction } from "../../../shared/types";
+import "./styles.css";
+
+interface ReactionTimeState {
+  status: string;
 }
 
-export const ReactionTime: React.FC<ReactionTimeProps> = ({ gameState }) => {
-  const { sendEvent } = useSocket();
+interface ReactionTimeProps {
+  gameState: unknown;
+  onAction: (action: GameAction) => void;
+}
+
+export function ReactionTime({ gameState, onAction }: ReactionTimeProps) {
+  const state = gameState as ReactionTimeState | null;
   const [clicked, setClicked] = useState(false);
 
   const handleClick = () => {
     if (clicked) return;
     setClicked(true);
-    sendEvent("game_action", { type: "click" });
+    onAction({ type: "click" });
   };
 
   const getBackgroundColor = () => {
-    switch (gameState.status) {
+    switch (state?.status) {
       case "ready":
         return "red";
       case "green":
@@ -522,24 +560,35 @@ export const ReactionTime: React.FC<ReactionTimeProps> = ({ gameState }) => {
       style={{ backgroundColor: getBackgroundColor(), height: "100vh" }}
       onClick={handleClick}
     >
-      <h1>{gameState.status === "ready" ? "Wait..." : "Click Now!"}</h1>
+      <h1>{state?.status === "ready" ? "Wait..." : "Click Now!"}</h1>
       {clicked && <p>Clicked!</p>}
     </div>
   );
-};
+}
 ```
 
-#### 5. Register Component
+#### 5. Wire the Component into `App.tsx`
+
+There is no `GAME_COMPONENTS` map. Games are imported and rendered with an explicit
+`gameId` check inside the "Show game if in progress" block of
+`minigames-frontend/src/App.tsx`:
 
 ```typescript
-// client/src/games/index.ts
-import { ReactionTime } from "./ReactionTime";
-// Import other game components...
+// minigames-frontend/src/App.tsx
+import { ReactionTime } from "./games/reaction-time";
+import { WouldYouRather } from "./games/would-you-rather";
+// import { YourNewGame } from "./games/your-new-game";
 
-export const GAME_COMPONENTS: Record<string, React.FC<any>> = {
-  reaction_time: ReactionTime,
-  // Add more game components
-};
+// ...inside App(), where the game is rendered:
+if (gameData && gameState && lobby?.status === "in_game") {
+  if (gameData.gameId === "reaction_time") {
+    return <ReactionTime gameState={gameState} onAction={sendGameAction} />;
+  }
+  if (gameData.gameId === "would_you_rather") {
+    return <WouldYouRather gameState={gameState} onAction={sendGameAction} />;
+  }
+  // Add a new branch here for your game's gameId
+}
 ```
 
 ### Best Practices for Game Development
@@ -559,12 +608,12 @@ export const GAME_COMPONENTS: Record<string, React.FC<any>> = {
 ### Socket.IO Service Pattern
 
 ```typescript
-// client/src/services/socket.ts
+// minigames-frontend/src/services/socket.ts
 import { io, Socket } from "socket.io-client";
 import {
   ClientToServerEvents,
   ServerToClientEvents,
-} from "../../../shared/types/events";
+} from "../../../shared/types";
 
 class SocketService {
   private socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =
@@ -604,10 +653,10 @@ export const socketService = new SocketService();
 ### Custom Hook Pattern
 
 ```typescript
-// client/src/hooks/useSocket.ts
+// minigames-frontend/src/hooks/useSocket.ts
 import { useEffect, useState } from "react";
 import { socketService } from "../services/socket";
-import { Lobby } from "../../../shared/types/lobby";
+import { Lobby } from "../../../shared/types";
 
 export const useSocket = () => {
   const [lobby, setLobby] = useState<Lobby | null>(null);
@@ -645,8 +694,8 @@ export const useSocket = () => {
 ### Server State Management
 
 ```typescript
-// server/src/managers/lobby-manager.ts
-import { Lobby, Player, LobbyConfig } from "../../../shared/types/lobby";
+// minigames-backend/src/managers/lobby-manager.ts
+import { Lobby, Player, LobbyConfig } from "../../../shared/types";
 
 class LobbyManager {
   private lobbies = new Map<string, Lobby>();
@@ -692,12 +741,16 @@ export const lobbyManager = new LobbyManager();
 
 ## Testing Strategy
 
+> Note: No automated test runner is configured yet (there is no `test` script and no Jest/Vitest
+> dependency in either workspace). The examples below are the target patterns — you'll need to add
+> a runner (e.g. Vitest) before they can run. Until then, rely on the Manual Testing Checklist.
+
 ### Unit Tests
 
 Test game logic in isolation:
 
 ```typescript
-// server/src/games/__tests__/reaction-time.test.ts
+// minigames-backend/src/games/__tests__/reaction-time.test.ts
 import { ReactionTimeGame } from "../reaction-time";
 
 describe("ReactionTimeGame", () => {
@@ -740,7 +793,7 @@ describe("ReactionTimeGame", () => {
 Test Socket.IO events:
 
 ```typescript
-// server/src/__tests__/socket.test.ts
+// minigames-backend/src/__tests__/socket.test.ts
 import { io as Client, Socket as ClientSocket } from "socket.io-client";
 import { createServer } from "../index";
 
@@ -786,28 +839,27 @@ describe("Socket.IO Events", () => {
 ### Environment Variables
 
 ```bash
-# server/.env
+# minigames-backend/.env
 PORT=3001
 NODE_ENV=production
 CLIENT_URL=https://yourdomain.com
 
-# client/.env
+# minigames-frontend/.env
 VITE_API_URL=https://api.yourdomain.com
 ```
 
 ### Production Build
 
 ```bash
-# Build client
-cd client
-npm run build
+# Build everything from the repo root
+pnpm build:all
 
-# Build server
-cd ../server
-npm run build
+# Or build individually
+cd minigames-frontend && pnpm build   # tsc -b && vite build
+cd ../minigames-backend && pnpm build  # tsc
 
-# Run production server
-npm start
+# Run production backend
+cd minigames-backend && pnpm start     # node dist/index.js
 ```
 
 ### Deployment Options
@@ -927,21 +979,23 @@ docs: update development guide
 ### Common Commands Reference
 
 ```bash
-# Start development
-npm run dev          # Client (Vite)
-npm run dev          # Server (nodemon + ts-node)
+# Start development (run from the repo root)
+pnpm dev:backend     # nodemon + ts-node (backend on :3001)
+pnpm dev:frontend    # Vite dev server
 
-# Type checking
-npm run type-check   # Check types without building
+# Install everything
+pnpm install:all
 
-# Linting
-npm run lint         # ESLint
-npm run lint:fix     # Auto-fix issues
+# Build
+pnpm build:all       # backend (tsc) + frontend (tsc -b && vite build)
 
-# Testing
-npm test             # Run all tests
-npm run test:watch   # Watch mode
-npm run test:coverage # Coverage report
+# Type checking (backend)
+cd minigames-backend && pnpm type-check   # tsc --noEmit
+
+# Linting (frontend only)
+cd minigames-frontend && pnpm lint        # ESLint
+
+# Testing: no runner configured yet (see Testing Strategy)
 ```
 
 ### Debugging Socket.IO
@@ -952,8 +1006,8 @@ Add this to see all Socket.IO events:
 // Client
 localStorage.debug = 'socket.io-client:socket';
 
-// Server
-DEBUG=socket.io:* npm run dev
+// Server (from minigames-backend/)
+DEBUG=socket.io:* pnpm dev
 ```
 
 ---

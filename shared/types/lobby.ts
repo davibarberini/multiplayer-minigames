@@ -2,7 +2,7 @@ import type { Player } from "./player";
 
 export interface LobbyConfig {
   pointsToWin: number;
-  gameMode: string | "random";
+  selectedGames: string[];
   maxPlayers?: number;
   isPrivate: boolean;
 }

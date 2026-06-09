@@ -3,9 +3,20 @@ import {
   DEFAULT_POINTS_TO_WIN,
   LOBBY_CODE_LENGTH,
 } from "../../../shared/constants";
+import { getAllGameIds, isValidGameId } from "../games/registry";
+
+function shuffle<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
 
 class LobbyManager {
   private lobbies = new Map<string, Lobby>();
+  private rotationPools = new Map<string, string[]>();
 
   createLobby(
     hostId: string,
@@ -30,7 +41,7 @@ class LobbyManager {
       players: [hostPlayer],
       config: {
         pointsToWin: config?.pointsToWin || DEFAULT_POINTS_TO_WIN,
-        gameMode: config?.gameMode || "reaction_time",
+        selectedGames: config?.selectedGames || getAllGameIds(),
         maxPlayers: config?.maxPlayers,
         isPrivate: config?.isPrivate !== undefined ? config.isPrivate : true,
       },
@@ -54,13 +65,11 @@ class LobbyManager {
     const lobby = this.lobbies.get(code);
     if (!lobby) return null;
 
-    // Check if player already exists
     const existingPlayer = lobby.players.find((p) => p.id === playerId);
     if (existingPlayer) {
       return lobby;
     }
 
-    // Check max players
     if (
       lobby.config.maxPlayers &&
       lobby.players.length >= lobby.config.maxPlayers
@@ -87,18 +96,80 @@ class LobbyManager {
 
     lobby.players = lobby.players.filter((p) => p.id !== playerId);
 
-    // If no players left, remove lobby
     if (lobby.players.length === 0) {
+      this.rotationPools.delete(code);
       this.lobbies.delete(code);
       return null;
     }
 
-    // If host left, assign new host
     if (lobby.hostId === playerId && lobby.players.length > 0) {
       lobby.hostId = lobby.players[0].id;
       lobby.players[0].isHost = true;
     }
 
+    return lobby;
+  }
+
+  updateSelectedGames(code: string, gameIds: string[]): Lobby | null {
+    const lobby = this.lobbies.get(code);
+    if (!lobby) return null;
+
+    const validIds = gameIds.filter((id) => isValidGameId(id));
+    const uniqueIds = [...new Set(validIds)];
+
+    if (uniqueIds.length === 0) return null;
+
+    lobby.config.selectedGames = uniqueIds;
+    this.clearRotationPool(code);
+    return lobby;
+  }
+
+  initRotationPool(code: string): void {
+    const lobby = this.lobbies.get(code);
+    if (!lobby) return;
+
+    this.rotationPools.set(code, shuffle([...lobby.config.selectedGames]));
+  }
+
+  pickNextGameId(code: string): string | null {
+    const lobby = this.lobbies.get(code);
+    if (!lobby || lobby.config.selectedGames.length === 0) return null;
+
+    let pool = this.rotationPools.get(code);
+    if (!pool || pool.length === 0) {
+      this.initRotationPool(code);
+      pool = this.rotationPools.get(code);
+    }
+
+    if (!pool || pool.length === 0) return null;
+
+    const nextId = pool.pop();
+    if (nextId) {
+      this.rotationPools.set(code, pool);
+      return nextId;
+    }
+
+    return null;
+  }
+
+  clearRotationPool(code: string): void {
+    this.rotationPools.delete(code);
+  }
+
+  setCurrentGame(code: string, gameId: string | undefined): void {
+    const lobby = this.lobbies.get(code);
+    if (lobby) {
+      lobby.currentGame = gameId;
+    }
+  }
+
+  endSession(code: string): Lobby | null {
+    const lobby = this.lobbies.get(code);
+    if (!lobby) return null;
+
+    lobby.status = "waiting";
+    lobby.currentGame = undefined;
+    this.clearRotationPool(code);
     return lobby;
   }
 
@@ -129,6 +200,7 @@ class LobbyManager {
   }
 
   removeLobby(code: string): void {
+    this.rotationPools.delete(code);
     this.lobbies.delete(code);
   }
 
@@ -157,12 +229,10 @@ class LobbyManager {
     return code;
   }
 
-  // Cleanup inactive lobbies (can be called periodically)
   cleanupInactiveLobbies(_maxAgeMs: number = 3600000): void {
-    // This is a simple implementation without lastActivity tracking
-    // In production, you'd track lastActivity timestamp
     this.lobbies.forEach((lobby, code) => {
       if (lobby.players.length === 0) {
+        this.rotationPools.delete(code);
         this.lobbies.delete(code);
       }
     });

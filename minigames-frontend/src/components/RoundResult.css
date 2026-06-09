@@ -202,6 +202,29 @@
   box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
 }
 
+.host-round-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.end-session-button-card {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: white;
+  color: #c62828;
+  border: 2px solid #ffcdd2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.end-session-button-card:hover {
+  background: #ffebee;
+}
+
 .waiting-text {
   text-align: center;
   color: #666;

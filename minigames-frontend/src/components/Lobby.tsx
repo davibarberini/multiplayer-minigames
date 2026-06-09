@@ -1,23 +1,51 @@
-import type { Lobby as LobbyType } from "../../../shared/types";
+import type { Lobby as LobbyType, MiniGameConfig } from "../../../shared/types";
 import "./Lobby.css";
 
 interface LobbyProps {
   lobby: LobbyType;
   currentPlayerId: string;
+  availableGames: MiniGameConfig[];
   onStartGame: () => void;
   onLeaveLobby: () => void;
   onTogglePrivacy: (isPrivate: boolean) => void;
+  onUpdateSelectedGames: (gameIds: string[]) => void;
+}
+
+function getGameName(games: MiniGameConfig[], id: string): string {
+  return games.find((g) => g.id === id)?.name ?? id;
 }
 
 export function Lobby({
   lobby,
   currentPlayerId,
+  availableGames,
   onStartGame,
   onLeaveLobby,
   onTogglePrivacy,
+  onUpdateSelectedGames,
 }: LobbyProps) {
   const isHost = lobby.hostId === currentPlayerId;
-  const canStart = lobby.players.length >= 2;
+  const canStart =
+    lobby.players.length >= 2 && lobby.config.selectedGames.length >= 1;
+
+  const toggleGame = (gameId: string) => {
+    const current = lobby.config.selectedGames;
+    const isSelected = current.includes(gameId);
+    const next = isSelected
+      ? current.filter((id) => id !== gameId)
+      : [...current, gameId];
+
+    if (next.length === 0) return;
+    onUpdateSelectedGames(next);
+  };
+
+  const selectAllGames = () => {
+    onUpdateSelectedGames(availableGames.map((g) => g.id));
+  };
+
+  const selectedSummary = lobby.config.selectedGames
+    .map((id) => getGameName(availableGames, id))
+    .join(", ");
 
   return (
     <div className="lobby-container">
@@ -37,12 +65,14 @@ export function Lobby({
 
         <div className="lobby-info">
           <div className="info-item">
-            <span className="info-label">Game Mode:</span>
-            <span className="info-value">{lobby.config.gameMode}</span>
-          </div>
-          <div className="info-item">
             <span className="info-label">Points to Win:</span>
             <span className="info-value">{lobby.config.pointsToWin}</span>
+          </div>
+          <div className="info-item">
+            <span className="info-label">Games in rotation:</span>
+            <span className="info-value">
+              {lobby.config.selectedGames.length}
+            </span>
           </div>
           {isHost && (
             <div className="info-item privacy-toggle">
@@ -58,6 +88,59 @@ export function Lobby({
                 <span className="toggle-slider"></span>
               </label>
             </div>
+          )}
+        </div>
+
+        <div className="games-section">
+          <h2>Game Rotation</h2>
+          <p className="games-hint">
+            Each round picks a random game from your selection, without repeating
+            until all have been played.
+          </p>
+
+          {isHost ? (
+            <>
+              <div className="games-actions">
+                <button
+                  type="button"
+                  className="games-action-btn"
+                  onClick={selectAllGames}
+                >
+                  Select all
+                </button>
+              </div>
+              <div className="games-list">
+                {availableGames.map((game) => {
+                  const isSelected = lobby.config.selectedGames.includes(
+                    game.id
+                  );
+                  const isLastSelected =
+                    isSelected && lobby.config.selectedGames.length === 1;
+
+                  return (
+                    <label
+                      key={game.id}
+                      className={`game-option ${isSelected ? "selected" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        disabled={isLastSelected}
+                        onChange={() => toggleGame(game.id)}
+                      />
+                      <div className="game-option-info">
+                        <span className="game-option-name">{game.name}</span>
+                        <span className="game-option-desc">
+                          {game.description}
+                        </span>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <p className="games-summary">{selectedSummary}</p>
           )}
         </div>
 
@@ -85,8 +168,11 @@ export function Lobby({
 
         {isHost && (
           <div className="host-actions">
-            {!canStart && (
+            {lobby.players.length < 2 && (
               <p className="warning">Need at least 2 players to start</p>
+            )}
+            {lobby.config.selectedGames.length === 0 && (
+              <p className="warning">Select at least one game</p>
             )}
             <button
               className="start-button"
