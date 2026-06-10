@@ -591,15 +591,85 @@ if (gameData && gameState && lobby?.status === "in_game") {
 }
 ```
 
+#### 6. Document the Completed Game in `jogos-feitos.md`
+
+When implementation is done, **move** the game's entry from `jogos-pra-criar.md` to
+`jogos-feitos.md` (newest at the top). The completed entry must include:
+
+- The full spec from the backlog (rules, actions, server logic, UI)
+- **Skippable wait times** — document what was actually implemented
+- **Completion date** (`YYYY-MM-DD`)
+- **Files touched** — backend engine, frontend folder, `registry.ts`, `App.tsx`
+
+Use the template in `jogos-feitos.md` as reference. Do not leave implemented games
+undocumented — `jogos-feitos.md` is the catalog of how each shipped game works.
+
+### Skippable Wait Times (Required)
+
+Every new game **must** let players skip idle waiting. Long fixed timers make rounds feel
+sluggish (e.g. vote countdowns plus multi-second result screens). Players who already acted
+should never be stuck watching a clock.
+
+**What must be skippable:**
+
+- Countdown timers (voting, answering, etc.) — end early when all players have acted
+- "Waiting for others…" phases after a player has submitted their action
+- Results / reveal / score screens before the next round
+- Any other non-interactive pause between phases
+
+**What is not a skippable wait** (core gameplay, not idle time):
+
+- Random delays that are part of the mechanic (e.g. Reaction Time's unpredictable green light)
+- The active window in which a player must perform an action (the timer itself is the challenge)
+
+**Implementation pattern:**
+
+1. **Server-side authority** — skipping advances the phase in `handleAction`; never advance
+   state from the client alone.
+2. **`GameAction` for skip** — e.g. `type: "skip"` or `type: "skip_phase"`. Handle it in the
+   engine and clear any `setInterval` / `setTimeout` tied to the current phase.
+3. **Early end when everyone is done** — if all players voted/answered, call the same
+   `endVoting()` (or equivalent) immediately instead of waiting for the countdown.
+4. **UI** — show a visible **Skip** / **Pular** button during skippable phases. Disable it
+   while the player still needs to act (e.g. hasn't voted yet). Optionally show "X/Y ready"
+   when waiting on others.
+5. **Results screens** — keep a short default display (2–5s) but always allow skip to
+   `ended` / next round.
+
+```typescript
+// Example: handle skip in the server engine
+handleAction(playerId: string, action: GameAction): void {
+  if (action.type === "skip") {
+    if (this.state.status === "results") {
+      this.advanceToEnded(); // clears resultsTimeout
+    }
+    return;
+  }
+  // ... other actions
+}
+
+// Example: end voting early when everyone voted
+private onVote(playerId: string, choice: VoteChoice): void {
+  this.state.votes.set(playerId, choice);
+  if (this.state.votes.size >= this.players.length) {
+    this.endVoting();
+  }
+}
+```
+
+When specifying a new game in `jogos-pra-criar.md`, list every timed phase and how it can
+be skipped (button, all-players-done, or both).
+
 ### Best Practices for Game Development
 
 1. **Keep Logic Server-Side**: Never trust client for game outcomes
-2. **Deterministic When Possible**: Same inputs = same outputs
-3. **Handle Edge Cases**: Disconnects, timeouts, early/late actions
-4. **Clear Win Conditions**: Obvious who won and why
-5. **Test with Multiple Players**: Ensure fairness
-6. **Optimize State Updates**: Only send what changed
-7. **Add Comments**: Explain game rules in code
+2. **Skippable Waits**: No mandatory idle timers — see [Skippable Wait Times](#skippable-wait-times-required)
+3. **Deterministic When Possible**: Same inputs = same outputs
+4. **Handle Edge Cases**: Disconnects, timeouts, early/late actions
+5. **Clear Win Conditions**: Obvious who won and why
+6. **Test with Multiple Players**: Ensure fairness
+7. **Optimize State Updates**: Only send what changed
+8. **Add Comments**: Explain game rules in code
 
 ---
 
@@ -826,6 +896,7 @@ describe("Socket.IO Events", () => {
 - [ ] Join lobby with valid/invalid codes
 - [ ] Start game with min/max players
 - [ ] Complete full game round
+- [ ] Skip / early-end every wait phase (countdown, results screen, waiting for others)
 - [ ] Test disconnect during game
 - [ ] Verify spectator mode triggers correctly
 - [ ] Test score accumulation
@@ -1084,6 +1155,7 @@ Before committing major changes:
 
 - [ ] Updated PROJECT-SPEC.md with new features/architecture
 - [ ] Updated DEVELOPMENT-GUIDE.md with new patterns/practices
+- [ ] Documented completed games in `jogos-feitos.md` (moved from `jogos-pra-criar.md`)
 - [ ] Updated README.md if user-facing changes
 - [ ] Added code examples for new patterns
 - [ ] Updated type definitions and interfaces

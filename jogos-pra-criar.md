@@ -5,8 +5,8 @@ Lista de mini-jogos planejados para implementar neste repositório. Cada entrada
 `DEVELOPMENT-GUIDE.md`.
 
 > Este arquivo serve de **fila de trabalho** para o comando `/criar-da-lista`, que lê a próxima
-> entrada com status `🔲 a fazer`, implementa o jogo e **move** a entrada para `jogos-feitos.md`
-> (para não poluir esta fila).
+> entrada com status `🔲 a fazer`, implementa o jogo, **documenta** o jogo concluído em
+> `jogos-feitos.md` e **remove** a entrada da fila abaixo.
 
 ---
 
@@ -17,6 +17,12 @@ Lista de mini-jogos planejados para implementar neste repositório. Cada entrada
 3. Use `id` em `snake_case` (ex.: `trivia_quiz`) — é o `gameId` usado no `GAME_REGISTRY`,
    no `App.tsx` e no nome das pastas.
 4. Mantenha o `status` atualizado conforme o jogo avança.
+5. **Tempos de espera puláveis** — em todo jogo novo, documente cada fase com timer ou pausa
+   e como o jogador pode pular (botão "Pular", fim antecipado quando todos agiram, etc.).
+   Ver `DEVELOPMENT-GUIDE.md` → *Skippable Wait Times*.
+6. **Ao concluir** — mova a entrada para `jogos-feitos.md` (seção no topo), preenchendo
+   data, arquivos tocados e a seção **Tempos de espera (puláveis)** com o que foi
+   implementado de fato.
 
 ### Legenda de status
 - 🔲 **a fazer** — ainda não implementado
@@ -57,6 +63,11 @@ Lista de mini-jogos planejados para implementar neste repositório. Cada entrada
 
 **UI / telas (frontend):**
 - (estados visuais: ex.: "votando", "resultado"; o que mostrar em cada um)
+
+**Tempos de espera (obrigatório — devem ser puláveis):**
+- (liste cada fase com espera: ex. countdown de voto 12s, tela de resultado 5s)
+- (como pular cada uma: botão "Pular", todos votaram → encerra na hora, etc.)
+- (ação no servidor, se houver: ex. `type: "skip"` na fase de resultados)
 
 **Dados necessários:**
 - (ex.: banco de perguntas, lista de palavras, categorias — onde colocar)
@@ -100,48 +111,16 @@ Lista de mini-jogos planejados para implementar neste repositório. Cada entrada
 - Estado "perguntando": enunciado + alternativas clicáveis + contador regressivo.
 - Estado "resultado": destaca a alternativa correta e mostra quem acertou.
 
+**Tempos de espera (obrigatório — devem ser puláveis):**
+- Countdown de resposta (10–15s): encerrar quando todos responderam.
+- Tela de resultado: botão **Pular** (`type: "skip"`) para avançar sem esperar.
+
 **Dados necessários:**
 - Banco de perguntas (enunciado, alternativas, índice correto). Sugestão: array constante no
   arquivo do jogo no backend (como o `QUESTIONS` de `would-you-rather.ts`).
 
 **Notas:**
 - Dá pra expandir com categorias e níveis de dificuldade depois.
-
----
-
-### Number Guessing
-- **id:** `number_guessing`
-- **status:** 🔲 a fazer
-- **prioridade:** média
-- **jogadores:** min 2 / max 8
-- **duração estimada:** 60 segundos
-- **complexidade:** ⭐
-
-**Como funciona (regras):**
-- O servidor sorteia um número secreto (ex.: 1-100).
-- Jogadores enviam palpites; o servidor responde "maior" ou "menor" para cada palpite.
-- Quem acertar o número primeiro ganha a ronda.
-
-**Por que encaixa nos critérios (GAME-IDEAS.md):**
-- Delay não afeta (cada palpite é avaliado individualmente); regra simples; ronda rápida.
-
-**Ações do jogador (`GameAction`):**
-- `type: "guess"` → payload: número do palpite.
-
-**Lógica do servidor (`MiniGameEngine`):**
-- Estado: número secreto, histórico de palpites por jogador, flag de vencedor.
-- Fim de ronda (`checkRoundEnd`): quando alguém acerta OU o tempo acaba (ninguém pontua se ninguém acertar).
-- Pontuação / vencedor: primeiro a acertar recebe o ponto.
-- Edge cases: ignorar palpites fora do intervalo; desconexão remove o jogador da ronda.
-
-**UI / telas (frontend):**
-- Campo de input para palpite + feedback "maior/menor" + histórico dos próprios palpites.
-
-**Dados necessários:**
-- Nenhum (número gerado aleatoriamente no servidor).
-
-**Notas:**
-- Variação: revelar palpites dos outros jogadores para criar tensão.
 
 ---
 

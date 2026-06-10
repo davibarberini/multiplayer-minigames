@@ -57,6 +57,7 @@ export class WouldYouRatherGame implements MiniGameEngine {
     voteCountdown: 0,
   };
   private countdownInterval: NodeJS.Timeout | null = null;
+  private resultsTimeout: NodeJS.Timeout | null = null;
 
   initialize(players: Player[]): void {
     this.players = players;
@@ -85,14 +86,24 @@ export class WouldYouRatherGame implements MiniGameEngine {
   }
 
   handleAction(playerId: string, action: GameAction): void {
+    if (action.type === "skip") {
+      if (this.state.status === "results") {
+        this.advanceToEnded();
+      }
+      return;
+    }
+
     if (action.type !== "vote") return;
     if (this.state.status !== "voting") return;
 
     const choice = action.payload as "A" | "B";
     if (choice !== "A" && choice !== "B") return;
 
-    // Player can change their vote
     this.state.votes.set(playerId, choice);
+
+    if (this.state.votes.size >= this.players.length) {
+      this.endVoting();
+    }
   }
 
   private endVoting(): void {
@@ -131,10 +142,17 @@ export class WouldYouRatherGame implements MiniGameEngine {
       winners,
     };
 
-    // Auto-end after showing results for 5 seconds
-    setTimeout(() => {
-      this.state.status = "ended";
+    this.resultsTimeout = setTimeout(() => {
+      this.advanceToEnded();
     }, 5000);
+  }
+
+  private advanceToEnded(): void {
+    if (this.resultsTimeout) {
+      clearTimeout(this.resultsTimeout);
+      this.resultsTimeout = null;
+    }
+    this.state.status = "ended";
   }
 
   getState(): GameState {
@@ -178,6 +196,10 @@ export class WouldYouRatherGame implements MiniGameEngine {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
+    }
+    if (this.resultsTimeout) {
+      clearTimeout(this.resultsTimeout);
+      this.resultsTimeout = null;
     }
 
     this.state = {

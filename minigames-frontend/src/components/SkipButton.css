@@ -1,0 +1,23 @@
+.skip-button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.skip-button:hover:not(:disabled) {
+  background: #e4e4e4;
+  border-color: #bbb;
+}
+
+.skip-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
