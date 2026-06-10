@@ -353,23 +353,26 @@ function handleRoundEnd(
   const lobby = lobbyManager.getLobby(lobbyCode);
   if (!lobby) return;
 
+  const noWinner = roundResult.stats?.noWinner === true;
   const winner = lobby.players.find((p) => p.id === roundResult.winnerId);
-  if (!winner) return;
 
-  // Update score
-  winner.score++;
-  lobbyManager.updatePlayerScore(lobbyCode, winner.id, winner.score);
+  if (!noWinner && !winner) return;
 
-  // Prepare round result
+  if (!noWinner && winner) {
+    winner.score++;
+    lobbyManager.updatePlayerScore(lobbyCode, winner.id, winner.score);
+  }
+
   const result: RoundResult = {
-    winnerId: winner.id,
-    winnerName: winner.username,
+    winnerId: noWinner ? "" : winner!.id,
+    winnerName: noWinner ? "" : winner!.username,
     stats: roundResult.stats,
     scores: Object.fromEntries(lobby.players.map((p) => [p.id, p.score])),
   };
 
-  // Send round result
   io.to(lobbyCode).emit("round_ended", result);
+
+  if (noWinner || !winner) return;
 
   // Check if someone won the game
   if (winner.score >= lobby.config.pointsToWin) {

@@ -52,6 +52,16 @@ export class ReactionTimeGame implements MiniGameEngine {
   }
 
   handleAction(playerId: string, action: GameAction): void {
+    if (action.type === "skip") {
+      if (
+        this.state.status === "green" &&
+        this.state.responses.has(playerId)
+      ) {
+        this.state.status = "ended";
+      }
+      return;
+    }
+
     if (action.type !== "click") return;
 
     // If clicked before green
@@ -77,6 +87,10 @@ export class ReactionTimeGame implements MiniGameEngine {
   }
 
   checkRoundEnd(): RoundEndResult | null {
+    if (this.state.status === "ended") {
+      return this.determineWinner();
+    }
+
     // End when all players responded
     if (this.state.responses.size >= this.players.length) {
       this.state.status = "ended";

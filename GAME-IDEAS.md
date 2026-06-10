@@ -6,6 +6,8 @@
 - ✅ **Rondas rápidas** (2-5 minutos)
 - ✅ **Fácil de entender**
 - ✅ **Divertido e competitivo**
+- ✅ **Esperas puláveis** — timers e telas de resultado devem ter botão "Pular" ou encerrar
+  cedo quando todos já agiram (ver `DEVELOPMENT-GUIDE.md`)
 
 ---
 

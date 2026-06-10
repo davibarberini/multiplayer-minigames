@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { GameAction } from "../../../shared/types";
+import { SkipButton } from "../../components/SkipButton";
 import "./styles.css";
 
 type VoteChoice = "higher" | "lower";
@@ -43,6 +44,10 @@ export function HigherLower({ gameState, onAction }: HigherLowerProps) {
     if (state?.status !== "voting") return;
     setSelectedChoice(choice);
     onAction({ type: "vote", payload: choice });
+  };
+
+  const handleSkip = () => {
+    onAction({ type: "skip" });
   };
 
   const hasVoted = selectedChoice !== null;
@@ -159,6 +164,10 @@ export function HigherLower({ gameState, onAction }: HigherLowerProps) {
                 <p className="hl-no-winner-message">
                   😅 Nobody guessed correctly this round.
                 </p>
+              )}
+
+              {state.status === "results" && (
+                <SkipButton onSkip={handleSkip} />
               )}
             </div>
           )}

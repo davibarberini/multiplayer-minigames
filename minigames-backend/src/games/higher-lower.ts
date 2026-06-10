@@ -97,6 +97,13 @@ export class HigherLowerGame implements MiniGameEngine {
   }
 
   handleAction(playerId: string, action: GameAction): void {
+    if (action.type === "skip") {
+      if (this.state.status === "results") {
+        this.advanceToEnded();
+      }
+      return;
+    }
+
     if (action.type !== "vote") return;
     if (this.state.status !== "voting") return;
 
@@ -104,6 +111,10 @@ export class HigherLowerGame implements MiniGameEngine {
     if (choice !== "higher" && choice !== "lower") return;
 
     this.state.votes.set(playerId, choice);
+
+    if (this.state.votes.size >= this.players.length) {
+      this.endVoting();
+    }
   }
 
   private endVoting(): void {
@@ -139,8 +150,16 @@ export class HigherLowerGame implements MiniGameEngine {
     };
 
     this.resultsTimeout = setTimeout(() => {
-      this.state.status = "ended";
+      this.advanceToEnded();
     }, RESULTS_DISPLAY_MS);
+  }
+
+  private advanceToEnded(): void {
+    if (this.resultsTimeout) {
+      clearTimeout(this.resultsTimeout);
+      this.resultsTimeout = null;
+    }
+    this.state.status = "ended";
   }
 
   getState(): GameState {

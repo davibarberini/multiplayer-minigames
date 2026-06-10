@@ -261,6 +261,10 @@ interface MiniGame {
 4. **Spectator View**: Spectators can see the game
 5. **Disconnect Handling**: Game continues if player disconnects
 6. **Input Validation**: Prevent cheating via client manipulation
+7. **Skippable Wait Times**: Every non-gameplay wait must be skippable — countdowns should
+   end early when all players have acted; results/reveal screens need a Skip button (or
+   equivalent). The server authoritatively handles skip actions. See
+   `DEVELOPMENT-GUIDE.md` → *Skippable Wait Times* for the full pattern.
 
 ### Game Ideas (for Future Implementation)
 

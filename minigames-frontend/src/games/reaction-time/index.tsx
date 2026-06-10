@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { GameAction } from "../../../shared/types";
+import { SkipButton } from "../../components/SkipButton";
 import "./styles.css";
 
 interface ReactionTimeState {
@@ -84,6 +85,10 @@ export function ReactionTime({ gameState, onAction }: ReactionTimeProps) {
 
         {clicked && state?.status !== "ended" && (
           <p className="click-feedback">✓ Response recorded</p>
+        )}
+
+        {clicked && state?.status === "green" && (
+          <SkipButton onSkip={() => onAction({ type: "skip" })} />
         )}
       </div>
     </div>

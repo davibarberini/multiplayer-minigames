@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { GameAction } from "../../../shared/types";
+import { SkipButton } from "../../components/SkipButton";
 import "./styles.css";
 
 interface WouldYouRatherState {
@@ -49,6 +50,10 @@ export function WouldYouRather({
     if (state?.status !== "voting") return;
     setSelectedOption(option);
     onAction({ type: "vote", payload: option });
+  };
+
+  const handleSkip = () => {
+    onAction({ type: "skip" });
   };
 
   const hasVoted = selectedOption !== null;
@@ -175,6 +180,8 @@ export function WouldYouRather({
             ) : (
               <p className="wyr-tie-message">🤝 It's a tie! No winners this round.</p>
             )}
+
+            <SkipButton onSkip={handleSkip} />
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import { LobbyList } from "./components/LobbyList";
 import { ReactionTime } from "./games/reaction-time";
 import { WouldYouRather } from "./games/would-you-rather";
 import { HigherLower } from "./games/higher-lower";
+import { NumberGuessing } from "./games/number-guessing";
 import { RoundResult } from "./components/RoundResult";
 import { Victory } from "./components/Victory";
 import "./App.css";
@@ -93,6 +94,15 @@ function App() {
       }
       if (gameData.gameId === "higher_lower") {
         return <HigherLower gameState={gameState} onAction={sendGameAction} />;
+      }
+      if (gameData.gameId === "number_guessing") {
+        return (
+          <NumberGuessing
+            gameState={gameState}
+            onAction={sendGameAction}
+            playerId={currentPlayerId}
+          />
+        );
       }
       return null;
     })();

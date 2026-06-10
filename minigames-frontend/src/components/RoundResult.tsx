@@ -19,6 +19,7 @@ export function RoundResult({
   onNextRound,
   onEndSession,
 }: RoundResultProps) {
+  const noWinner = result.stats.noWinner === true;
   const winner = players.find((p) => p.id === result.winnerId);
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
@@ -34,16 +35,25 @@ export function RoundResult({
         <h1 className="result-title">Round Complete!</h1>
 
         <div className="winner-section">
-          <div className="winner-badge">🏆</div>
-          {winner && (
+          {noWinner ? (
             <div className="winner-info">
-              <div
-                className="winner-color"
-                style={{ backgroundColor: winner.color }}
-              />
-              <h2 className="winner-name">{winner.username}</h2>
-              <p className="winner-label">wins this round!</p>
+              <h2 className="winner-name">Nobody wins this round</h2>
+              <p className="winner-label">Scores unchanged</p>
             </div>
+          ) : (
+            <>
+              <div className="winner-badge">🏆</div>
+              {winner && (
+                <div className="winner-info">
+                  <div
+                    className="winner-color"
+                    style={{ backgroundColor: winner.color }}
+                  />
+                  <h2 className="winner-name">{winner.username}</h2>
+                  <p className="winner-label">wins this round!</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
