@@ -158,3 +158,14 @@
   margin-bottom: 15px;
   text-align: center;
 }
+
+.language-link {
+  display: block;
+  margin-top: 24px;
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+}

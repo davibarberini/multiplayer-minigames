@@ -1,4 +1,5 @@
-import type { Player } from "../../../shared/types";
+import type { Player } from "shared/types";
+import { useTranslation } from "../i18n/I18nContext";
 import "./Victory.css";
 
 interface VictoryProps {
@@ -8,6 +9,7 @@ interface VictoryProps {
 }
 
 export function Victory({ winner, players, onReturnToLobby }: VictoryProps) {
+  const { t } = useTranslation();
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
   return (
@@ -15,7 +17,7 @@ export function Victory({ winner, players, onReturnToLobby }: VictoryProps) {
       <div className="victory-card">
         <div className="confetti">🎉</div>
 
-        <h1 className="victory-title">Game Over!</h1>
+        <h1 className="victory-title">{t("victory.title")}</h1>
 
         <div className="champion-section">
           <div className="champion-trophy">🏆</div>
@@ -24,12 +26,14 @@ export function Victory({ winner, players, onReturnToLobby }: VictoryProps) {
             style={{ backgroundColor: winner.color }}
           />
           <h2 className="champion-name">{winner.username}</h2>
-          <p className="champion-label">is the Champion!</p>
-          <div className="champion-score">{winner.score} points</div>
+          <p className="champion-label">{t("victory.champion")}</p>
+          <div className="champion-score">
+            {t("victory.points", { score: winner.score })}
+          </div>
         </div>
 
         <div className="final-standings">
-          <h3>Final Standings</h3>
+          <h3>{t("victory.finalStandings")}</h3>
           <div className="standings-list">
             {sortedPlayers.map((player, index) => (
               <div
@@ -54,10 +58,10 @@ export function Victory({ winner, players, onReturnToLobby }: VictoryProps) {
         </div>
 
         <button className="return-button" onClick={onReturnToLobby}>
-          Return to Lobby
+          {t("victory.returnToLobby")}
         </button>
 
-        <p className="rematch-hint">Ready for a rematch? 🎮</p>
+        <p className="rematch-hint">{t("victory.rematchHint")}</p>
       </div>
     </div>
   );

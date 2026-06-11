@@ -56,6 +56,52 @@ Use o template abaixo como referência.
 
 ---
 
+### Finish the Phrase
+- **id:** `finish_the_phrase`
+- **status:** ✅ feito
+- **concluído em:** 2026-06-09
+- **jogadores:** min 2 / max 8
+- **duração estimada:** 45 segundos
+- **complexidade:** ⭐⭐
+
+**Como funciona (regras):**
+- O servidor sorteia um prompt ridículo (ex.: "The worst superpower would be...").
+- Fase de escrita (20s): cada jogador completa a frase com algo engraçado.
+- Fase de voto (15s): respostas aparecem anonimizadas; cada um vota na mais engraçada
+  (não pode votar na própria).
+- Quem recebe mais votos ganha a ronda; empate sem votos = sem vencedor.
+
+**Ações do jogador (`GameAction`):**
+- `type: "submit"` → payload: texto da resposta (3–120 caracteres)
+- `type: "vote"` → payload: `displayIndex` da opção escolhida
+- `type: "skip"` → sem payload; pula a tela de resultado (fase `results`)
+
+**Lógica do servidor (`MiniGameEngine`):**
+- Estado: `prompt`, `submissions`, `displayOptions` (embaralhadas), `votes`, `phaseCountdown`.
+- Fases: `writing` → `voting` → `results` → `ended`.
+- Fim de ronda (`checkRoundEnd`): quando `status === "ended"`.
+- Pontuação: autor da resposta com mais votos; empate entre top = sorteio entre eles.
+- Edge cases: texto inválido ignorado; voto na própria resposta rejeitado; zero envios = `noWinner`.
+
+**UI / telas (frontend):**
+- `writing`: prompt + textarea + contador e progresso de envios.
+- `voting`: opções anonimizadas (A, B, C...) + timer.
+- `results`: ranking de respostas com contagem de votos e destaque do vencedor.
+
+**Tempos de espera (puláveis):**
+- Escrita (20s): encerra **na hora** quando todos enviaram.
+- Voto (15s): encerra **na hora** quando todos votaram.
+- Tela de resultado (5s): botão **Pular** envia `skip`.
+
+**Arquivos:**
+- `minigames-backend/src/games/finish-the-phrase.ts`
+- `minigames-frontend/src/games/finish-the-phrase/index.tsx`
+- `minigames-frontend/src/games/finish-the-phrase/styles.css`
+- `minigames-backend/src/games/registry.ts`
+- `minigames-frontend/src/App.tsx`
+
+---
+
 ### Number Guessing
 - **id:** `number_guessing`
 - **status:** ✅ feito

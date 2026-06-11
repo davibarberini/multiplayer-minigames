@@ -1,16 +1,14 @@
+import { useTranslation } from "../i18n/I18nContext";
 import "./SkipButton.css";
 
 interface SkipButtonProps {
   onSkip: () => void;
   disabled?: boolean;
-  label?: string;
 }
 
-export function SkipButton({
-  onSkip,
-  disabled = false,
-  label = "Pular",
-}: SkipButtonProps) {
+export function SkipButton({ onSkip, disabled = false }: SkipButtonProps) {
+  const { t } = useTranslation();
+
   return (
     <button
       type="button"
@@ -18,7 +16,7 @@ export function SkipButton({
       onClick={onSkip}
       disabled={disabled}
     >
-      {label}
+      {t("common.skip")}
     </button>
   );
 }

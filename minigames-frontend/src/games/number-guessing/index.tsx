@@ -1,6 +1,7 @@
 import { useState } from "react";
-import type { GameAction } from "../../../shared/types";
+import type { GameAction } from "shared/types";
 import { SkipButton } from "../../components/SkipButton";
+import { useTranslation } from "../../i18n/I18nContext";
 import "./styles.css";
 
 type GuessHint = "higher" | "lower" | "correct";
@@ -28,22 +29,12 @@ interface NumberGuessingProps {
   playerId: string;
 }
 
-function hintLabel(hint: GuessHint): string {
-  switch (hint) {
-    case "higher":
-      return "Higher ↑";
-    case "lower":
-      return "Lower ↓";
-    case "correct":
-      return "Correct! ✓";
-  }
-}
-
 export function NumberGuessing({
   gameState,
   onAction,
   playerId,
 }: NumberGuessingProps) {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
   const state = gameState as NumberGuessingState | null;
 
@@ -52,6 +43,17 @@ export function NumberGuessing({
   const myGuesses =
     state?.guesses?.filter((entry) => entry.playerId === playerId) ?? [];
   const lastHint = myGuesses.at(-1)?.hint;
+
+  const hintLabel = (hint: GuessHint) => {
+    switch (hint) {
+      case "higher":
+        return t("games.number_guessing.hintHigher");
+      case "lower":
+        return t("games.number_guessing.hintLower");
+      case "correct":
+        return t("games.number_guessing.hintCorrect");
+    }
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -71,7 +73,7 @@ export function NumberGuessing({
   if (!state) {
     return (
       <div className="ng-container">
-        <div className="ng-loading">Loading round...</div>
+        <div className="ng-loading">{t("games.number_guessing.loading")}</div>
       </div>
     );
   }
@@ -79,22 +81,24 @@ export function NumberGuessing({
   return (
     <div className="ng-container">
       <div className="ng-content">
-        <h1 className="ng-title">Number Guessing</h1>
+        <h1 className="ng-title">{t("games.number_guessing.title")}</h1>
         <p className="ng-subtitle">
-          Guess the secret number between {min} and {max}
+          {t("games.number_guessing.subtitle", { min, max })}
         </p>
 
         {state.status === "guessing" && (
           <>
             <div className="ng-range-badge">
-              Range: {min}–{max}
+              {t("common.range", { min, max })}
             </div>
 
             {lastHint && lastHint !== "correct" && (
               <div
                 className={`ng-hint-banner ${lastHint === "higher" ? "higher" : "lower"}`}
               >
-                Try {lastHint === "higher" ? "higher" : "lower"}!
+                {lastHint === "higher"
+                  ? t("games.number_guessing.tryHigher")
+                  : t("games.number_guessing.tryLower")}
               </div>
             )}
 
@@ -110,17 +114,23 @@ export function NumberGuessing({
                 autoFocus
               />
               <button type="submit" className="ng-submit-btn">
-                Guess
+                {t("games.number_guessing.guess")}
               </button>
             </form>
 
             {state.roundCountdown !== undefined && (
-              <p className="ng-timer">{state.roundCountdown}s remaining</p>
+              <p className="ng-timer">
+                {t("common.secondsRemaining", {
+                  count: state.roundCountdown,
+                })}
+              </p>
             )}
 
             {myGuesses.length > 0 && (
               <div className="ng-history">
-                <h3 className="ng-history-title">Your guesses</h3>
+                <h3 className="ng-history-title">
+                  {t("games.number_guessing.yourGuesses")}
+                </h3>
                 <ul className="ng-history-list">
                   {myGuesses.map((entry, index) => (
                     <li key={index} className="ng-history-item">
@@ -140,20 +150,24 @@ export function NumberGuessing({
           state.secretNumber !== null &&
           state.secretNumber !== undefined && (
             <div className="ng-results">
-              <h2 className="ng-results-title">Round over</h2>
+              <h2 className="ng-results-title">
+                {t("games.number_guessing.roundOver")}
+              </h2>
 
               <div className="ng-secret-reveal">
-                <span className="ng-secret-label">Secret number</span>
+                <span className="ng-secret-label">
+                  {t("games.number_guessing.secretNumber")}
+                </span>
                 <span className="ng-secret-value">{state.secretNumber}</span>
               </div>
 
               {state.winnerPlayerId && !state.noWinner ? (
                 <p className="ng-winner-message">
-                  🎉 Someone guessed it correctly and wins the round!
+                  {t("games.number_guessing.winnerMessage")}
                 </p>
               ) : (
                 <p className="ng-no-winner-message">
-                  ⏱️ Time ran out — nobody guessed the number this round.
+                  {t("games.number_guessing.timeoutMessage")}
                 </p>
               )}
 

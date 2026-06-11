@@ -28,7 +28,7 @@ export function setupEventHandlers(
         socket.emit("lobby_created", lobby);
         console.log(`Lobby created: ${lobby.code} by ${username}`);
       } catch (error) {
-        socket.emit("error", { message: "Failed to create lobby" });
+        socket.emit("error", { code: "FAILED_TO_CREATE_LOBBY" });
       }
     });
 
@@ -38,12 +38,12 @@ export function setupEventHandlers(
         const lobby = lobbyManager.getLobby(code);
 
         if (!lobby) {
-          socket.emit("error", { message: "Lobby not found" });
+          socket.emit("error", { code: "LOBBY_NOT_FOUND" });
           return;
         }
 
         if (lobby.status !== "waiting") {
-          socket.emit("error", { message: "Game already in progress" });
+          socket.emit("error", { code: "GAME_ALREADY_IN_PROGRESS" });
           return;
         }
 
@@ -55,7 +55,7 @@ export function setupEventHandlers(
         );
 
         if (!updatedLobby) {
-          socket.emit("error", { message: "Lobby is full" });
+          socket.emit("error", { code: "LOBBY_IS_FULL" });
           return;
         }
 
@@ -71,7 +71,7 @@ export function setupEventHandlers(
 
         console.log(`${username} joined lobby: ${code}`);
       } catch (error) {
-        socket.emit("error", { message: "Failed to join lobby" });
+        socket.emit("error", { code: "FAILED_TO_JOIN_LOBBY" });
       }
     });
 
@@ -86,7 +86,7 @@ export function setupEventHandlers(
         const publicLobbies = lobbyManager.getPublicLobbies();
         socket.emit("public_lobbies", publicLobbies);
       } catch (error) {
-        socket.emit("error", { message: "Failed to get public lobbies" });
+        socket.emit("error", { code: "FAILED_TO_GET_PUBLIC_LOBBIES" });
       }
     });
 
@@ -95,18 +95,18 @@ export function setupEventHandlers(
       try {
         const lobbyCode = getLobbyCodeForSocket(socket);
         if (!lobbyCode) {
-          socket.emit("error", { message: "Not in a lobby" });
+          socket.emit("error", { code: "NOT_IN_A_LOBBY" });
           return;
         }
 
         const lobby = lobbyManager.getLobby(lobbyCode);
         if (!lobby) {
-          socket.emit("error", { message: "Lobby not found" });
+          socket.emit("error", { code: "LOBBY_NOT_FOUND" });
           return;
         }
 
         if (lobby.hostId !== socket.id) {
-          socket.emit("error", { message: "Only host can change privacy" });
+          socket.emit("error", { code: "ONLY_HOST_CAN_CHANGE_PRIVACY" });
           return;
         }
 
@@ -123,7 +123,7 @@ export function setupEventHandlers(
           );
         }
       } catch (error) {
-        socket.emit("error", { message: "Failed to toggle lobby privacy" });
+        socket.emit("error", { code: "FAILED_TO_TOGGLE_LOBBY_PRIVACY" });
       }
     });
 
@@ -132,36 +132,36 @@ export function setupEventHandlers(
       try {
         const lobbyCode = getLobbyCodeForSocket(socket);
         if (!lobbyCode) {
-          socket.emit("error", { message: "Not in a lobby" });
+          socket.emit("error", { code: "NOT_IN_A_LOBBY" });
           return;
         }
 
         const lobby = lobbyManager.getLobby(lobbyCode);
         if (!lobby) {
-          socket.emit("error", { message: "Lobby not found" });
+          socket.emit("error", { code: "LOBBY_NOT_FOUND" });
           return;
         }
 
         if (lobby.hostId !== socket.id) {
-          socket.emit("error", { message: "Only host can update games" });
+          socket.emit("error", { code: "ONLY_HOST_CAN_UPDATE_GAMES" });
           return;
         }
 
         if (lobby.status !== "waiting") {
-          socket.emit("error", { message: "Cannot change games during a session" });
+          socket.emit("error", { code: "CANNOT_CHANGE_GAMES_DURING_SESSION" });
           return;
         }
 
         const updatedLobby = lobbyManager.updateSelectedGames(lobbyCode, gameIds);
         if (!updatedLobby) {
-          socket.emit("error", { message: "Select at least one valid game" });
+          socket.emit("error", { code: "SELECT_AT_LEAST_ONE_VALID_GAME" });
           return;
         }
 
         io.to(lobbyCode).emit("lobby_updated", updatedLobby);
       } catch (error) {
         console.error("Error updating selected games:", error);
-        socket.emit("error", { message: "Failed to update selected games" });
+        socket.emit("error", { code: "FAILED_TO_UPDATE_SELECTED_GAMES" });
       }
     });
 
@@ -170,28 +170,28 @@ export function setupEventHandlers(
       try {
         const lobbyCode = getLobbyCodeForSocket(socket);
         if (!lobbyCode) {
-          socket.emit("error", { message: "Not in a lobby" });
+          socket.emit("error", { code: "NOT_IN_A_LOBBY" });
           return;
         }
 
         const lobby = lobbyManager.getLobby(lobbyCode);
         if (!lobby) {
-          socket.emit("error", { message: "Lobby not found" });
+          socket.emit("error", { code: "LOBBY_NOT_FOUND" });
           return;
         }
 
         if (lobby.hostId !== socket.id) {
-          socket.emit("error", { message: "Only host can start game" });
+          socket.emit("error", { code: "ONLY_HOST_CAN_START_GAME" });
           return;
         }
 
         if (lobby.players.length < 2) {
-          socket.emit("error", { message: "Need at least 2 players" });
+          socket.emit("error", { code: "NEED_AT_LEAST_2_PLAYERS" });
           return;
         }
 
         if (lobby.config.selectedGames.length === 0) {
-          socket.emit("error", { message: "Select at least one game" });
+          socket.emit("error", { code: "SELECT_AT_LEAST_ONE_GAME" });
           return;
         }
 
@@ -199,7 +199,7 @@ export function setupEventHandlers(
         console.log(`Game started in lobby: ${lobbyCode}`);
       } catch (error) {
         console.error("Error starting game:", error);
-        socket.emit("error", { message: "Failed to start game" });
+        socket.emit("error", { code: "FAILED_TO_START_GAME" });
       }
     });
 

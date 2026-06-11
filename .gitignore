@@ -1,5 +1,5 @@
 .cursor/
 .env
 node_modules/
-dist/
+minigames-backend/dist/
 .DS_Store

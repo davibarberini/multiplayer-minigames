@@ -1,4 +1,6 @@
-import type { Lobby as LobbyType, MiniGameConfig } from "../../../shared/types";
+import type { Lobby as LobbyType, MiniGameConfig } from "shared/types";
+import { getGameMeta } from "shared/i18n";
+import { useTranslation } from "../i18n/I18nContext";
 import "./Lobby.css";
 
 interface LobbyProps {
@@ -11,10 +13,6 @@ interface LobbyProps {
   onUpdateSelectedGames: (gameIds: string[]) => void;
 }
 
-function getGameName(games: MiniGameConfig[], id: string): string {
-  return games.find((g) => g.id === id)?.name ?? id;
-}
-
 export function Lobby({
   lobby,
   currentPlayerId,
@@ -24,6 +22,8 @@ export function Lobby({
   onTogglePrivacy,
   onUpdateSelectedGames,
 }: LobbyProps) {
+  const { t, locale } = useTranslation();
+  const activeLocale = locale ?? "en";
   const isHost = lobby.hostId === currentPlayerId;
   const canStart =
     lobby.players.length >= 2 && lobby.config.selectedGames.length >= 1;
@@ -44,32 +44,32 @@ export function Lobby({
   };
 
   const selectedSummary = lobby.config.selectedGames
-    .map((id) => getGameName(availableGames, id))
+    .map((id) => getGameMeta(activeLocale, id).name)
     .join(", ");
 
   return (
     <div className="lobby-container">
       <div className="lobby-card">
         <div className="lobby-header">
-          <h1>🎮 Lobby</h1>
+          <h1>{t("lobby.title")}</h1>
           <button className="leave-button" onClick={onLeaveLobby}>
-            Leave
+            {t("lobby.leave")}
           </button>
         </div>
 
         <div className="lobby-code-section">
-          <label>Lobby Code</label>
+          <label>{t("lobby.lobbyCode")}</label>
           <div className="lobby-code">{lobby.code}</div>
-          <p className="lobby-code-hint">Share this code with your friends!</p>
+          <p className="lobby-code-hint">{t("lobby.shareCode")}</p>
         </div>
 
         <div className="lobby-info">
           <div className="info-item">
-            <span className="info-label">Points to Win:</span>
+            <span className="info-label">{t("lobby.pointsToWin")}</span>
             <span className="info-value">{lobby.config.pointsToWin}</span>
           </div>
           <div className="info-item">
-            <span className="info-label">Games in rotation:</span>
+            <span className="info-label">{t("lobby.gamesInRotation")}</span>
             <span className="info-value">
               {lobby.config.selectedGames.length}
             </span>
@@ -77,7 +77,9 @@ export function Lobby({
           {isHost && (
             <div className="info-item privacy-toggle">
               <span className="info-label">
-                {lobby.config.isPrivate ? "🔒 Private" : "🌐 Public"}
+                {lobby.config.isPrivate
+                  ? t("lobby.private")
+                  : t("lobby.public")}
               </span>
               <label className="toggle-switch">
                 <input
@@ -92,11 +94,8 @@ export function Lobby({
         </div>
 
         <div className="games-section">
-          <h2>Game Rotation</h2>
-          <p className="games-hint">
-            Each round picks a random game from your selection, without repeating
-            until all have been played.
-          </p>
+          <h2>{t("lobby.gameRotation")}</h2>
+          <p className="games-hint">{t("lobby.rotationHint")}</p>
 
           {isHost ? (
             <>
@@ -106,11 +105,12 @@ export function Lobby({
                   className="games-action-btn"
                   onClick={selectAllGames}
                 >
-                  Select all
+                  {t("lobby.selectAll")}
                 </button>
               </div>
               <div className="games-list">
                 {availableGames.map((game) => {
+                  const meta = getGameMeta(activeLocale, game.id);
                   const isSelected = lobby.config.selectedGames.includes(
                     game.id
                   );
@@ -129,9 +129,9 @@ export function Lobby({
                         onChange={() => toggleGame(game.id)}
                       />
                       <div className="game-option-info">
-                        <span className="game-option-name">{game.name}</span>
+                        <span className="game-option-name">{meta.name}</span>
                         <span className="game-option-desc">
-                          {game.description}
+                          {meta.description}
                         </span>
                       </div>
                     </label>
@@ -145,7 +145,7 @@ export function Lobby({
         </div>
 
         <div className="players-section">
-          <h2>Players ({lobby.players.length})</h2>
+          <h2>{t("lobby.players", { count: lobby.players.length })}</h2>
           <div className="players-list">
             {lobby.players.map((player) => (
               <div key={player.id} className="player-card">
@@ -156,10 +156,12 @@ export function Lobby({
                 <div className="player-info">
                   <span className="player-name">
                     {player.username}
-                    {player.isHost && " 👑"}
-                    {player.id === currentPlayerId && " (You)"}
+                    {player.isHost && ` ${t("common.host")}`}
+                    {player.id === currentPlayerId && ` ${t("common.you")}`}
                   </span>
-                  <span className="player-score">Score: {player.score}</span>
+                  <span className="player-score">
+                    {t("common.score", { score: player.score })}
+                  </span>
                 </div>
               </div>
             ))}
@@ -169,24 +171,24 @@ export function Lobby({
         {isHost && (
           <div className="host-actions">
             {lobby.players.length < 2 && (
-              <p className="warning">Need at least 2 players to start</p>
+              <p className="warning">{t("lobby.needTwoPlayers")}</p>
             )}
             {lobby.config.selectedGames.length === 0 && (
-              <p className="warning">Select at least one game</p>
+              <p className="warning">{t("lobby.selectOneGame")}</p>
             )}
             <button
               className="start-button"
               onClick={onStartGame}
               disabled={!canStart}
             >
-              Start Game
+              {t("lobby.startGame")}
             </button>
           </div>
         )}
 
         {!isHost && (
           <div className="waiting-message">
-            <p>Waiting for host to start the game...</p>
+            <p>{t("lobby.waitingForHost")}</p>
           </div>
         )}
       </div>

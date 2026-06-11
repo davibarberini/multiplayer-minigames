@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import type { GameAction } from "../../../shared/types";
+import type { GameAction } from "shared/types";
+import { getWyrQuestion } from "shared/i18n";
 import { SkipButton } from "../../components/SkipButton";
+import { useTranslation } from "../../i18n/I18nContext";
 import "./styles.css";
 
 interface WouldYouRatherState {
   status: string;
-  question?: { optionA: string; optionB: string };
+  questionKey?: string | null;
   votes?: Array<[string, "A" | "B"]>;
   voteCountdown?: number;
   results?: {
@@ -26,25 +28,15 @@ export function WouldYouRather({
   gameState,
   onAction,
 }: WouldYouRatherProps) {
+  const { t, locale } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<"A" | "B" | null>(null);
   const state = gameState as WouldYouRatherState | null;
 
-  // Get current player ID from socket (we'll need to pass this as prop or get from context)
-  // For now, we'll track locally
   useEffect(() => {
-    // Reset selection when new question appears
-    if (state?.status === "voting" && state?.question) {
-      // Check if we already voted in this round
-      const currentVote = state.votes?.find(
-        ([playerId]) => playerId === "current"
-      );
-      if (currentVote) {
-        setSelectedOption(currentVote[1]);
-      } else {
-        setSelectedOption(null);
-      }
+    if (state?.status === "voting" && state?.questionKey) {
+      setSelectedOption(null);
     }
-  }, [state?.question, state?.status]);
+  }, [state?.questionKey, state?.status]);
 
   const handleVote = (option: "A" | "B") => {
     if (state?.status !== "voting") return;
@@ -58,18 +50,20 @@ export function WouldYouRather({
 
   const hasVoted = selectedOption !== null;
 
-  if (!state || !state.question) {
+  if (!state || !state.questionKey || !locale) {
     return (
       <div className="wyr-container">
-        <div className="wyr-loading">Loading question...</div>
+        <div className="wyr-loading">{t("games.would_you_rather.loading")}</div>
       </div>
     );
   }
 
+  const question = getWyrQuestion(locale, state.questionKey);
+
   return (
     <div className="wyr-container">
       <div className="wyr-content">
-        <h1 className="wyr-title">Would You Rather?</h1>
+        <h1 className="wyr-title">{t("games.would_you_rather.title")}</h1>
 
         {state.status === "voting" && (
           <>
@@ -80,11 +74,11 @@ export function WouldYouRather({
                 disabled={hasVoted}
               >
                 <div className="wyr-option-letter">A</div>
-                <div className="wyr-option-text">{state.question.optionA}</div>
+                <div className="wyr-option-text">{question.optionA}</div>
               </button>
 
               <div className="wyr-divider">
-                <span>OR</span>
+                <span>{t("common.or")}</span>
               </div>
 
               <button
@@ -93,26 +87,33 @@ export function WouldYouRather({
                 disabled={hasVoted}
               >
                 <div className="wyr-option-letter">B</div>
-                <div className="wyr-option-text">{state.question.optionB}</div>
+                <div className="wyr-option-text">{question.optionB}</div>
               </button>
             </div>
 
             <div className="wyr-footer">
               {hasVoted ? (
-                <p className="wyr-voted">✓ Vote recorded! Waiting for others...</p>
+                <p className="wyr-voted">{t("common.voteRecorded")}</p>
               ) : (
-                <p className="wyr-hint">Click an option to vote</p>
+                <p className="wyr-hint">
+                  {t("games.would_you_rather.clickToVote")}
+                </p>
               )}
               <div className="wyr-countdown">
                 {state.voteCountdown !== undefined && (
                   <span className="wyr-timer">
-                    {state.voteCountdown}s remaining
+                    {t("common.secondsRemaining", {
+                      count: state.voteCountdown,
+                    })}
                   </span>
                 )}
                 {state.votedPlayers !== undefined &&
                   state.totalPlayers !== undefined && (
                     <span className="wyr-progress">
-                      {state.votedPlayers}/{state.totalPlayers} voted
+                      {t("common.voted", {
+                        voted: state.votedPlayers,
+                        total: state.totalPlayers,
+                      })}
                     </span>
                   )}
               </div>
@@ -122,13 +123,15 @@ export function WouldYouRather({
 
         {state.status === "results" && state.results && (
           <div className="wyr-results">
-            <h2 className="wyr-results-title">Results</h2>
+            <h2 className="wyr-results-title">
+              {t("games.would_you_rather.results")}
+            </h2>
 
             <div className="wyr-results-container">
               <div className="wyr-result-option">
                 <div className="wyr-result-header">
                   <span className="wyr-result-letter">A</span>
-                  <span className="wyr-result-text">{state.question.optionA}</span>
+                  <span className="wyr-result-text">{question.optionA}</span>
                 </div>
                 <div className="wyr-result-bar">
                   <div
@@ -143,15 +146,20 @@ export function WouldYouRather({
                   />
                 </div>
                 <div className="wyr-result-count">
-                  {state.results.optionA} vote
-                  {state.results.optionA !== 1 ? "s" : ""}
+                  {t("games.would_you_rather.voteCount", {
+                    count: state.results.optionA,
+                    voteLabel:
+                      state.results.optionA === 1
+                        ? t("common.vote")
+                        : t("common.votes"),
+                  })}
                 </div>
               </div>
 
               <div className="wyr-result-option">
                 <div className="wyr-result-header">
                   <span className="wyr-result-letter">B</span>
-                  <span className="wyr-result-text">{state.question.optionB}</span>
+                  <span className="wyr-result-text">{question.optionB}</span>
                 </div>
                 <div className="wyr-result-bar">
                   <div
@@ -166,19 +174,28 @@ export function WouldYouRather({
                   />
                 </div>
                 <div className="wyr-result-count">
-                  {state.results.optionB} vote
-                  {state.results.optionB !== 1 ? "s" : ""}
+                  {t("games.would_you_rather.voteCount", {
+                    count: state.results.optionB,
+                    voteLabel:
+                      state.results.optionB === 1
+                        ? t("common.vote")
+                        : t("common.votes"),
+                  })}
                 </div>
               </div>
             </div>
 
             {state.results.winners.length > 0 ? (
               <p className="wyr-winner-message">
-                🎉 Option {state.results.optionA > state.results.optionB ? "A" : "B"}{" "}
-                wins! Winners get 1 point.
+                {t("games.would_you_rather.winnerMessage", {
+                  option:
+                    state.results.optionA > state.results.optionB ? "A" : "B",
+                })}
               </p>
             ) : (
-              <p className="wyr-tie-message">🤝 It's a tie! No winners this round.</p>
+              <p className="wyr-tie-message">
+                {t("games.would_you_rather.tieMessage")}
+              </p>
             )}
 
             <SkipButton onSkip={handleSkip} />
@@ -188,4 +205,3 @@ export function WouldYouRather({
     </div>
   );
 }
-

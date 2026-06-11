@@ -30,7 +30,7 @@ export interface ServerToClientEvents {
   game_state_update: (state: unknown) => void;
   round_ended: (result: RoundResult) => void;
   game_ended: (winner: Player, finalScores: Record<string, number>) => void;
-  error: (error: { message: string }) => void;
+  error: (error: { code?: string; message?: string }) => void;
   available_games: (games: MiniGameConfig[]) => void;
   public_lobbies: (lobbies: Lobby[]) => void;
 }

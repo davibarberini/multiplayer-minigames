@@ -673,6 +673,48 @@ be skipped (button, all-players-done, or both).
 
 ---
 
+## Internationalization (i18n)
+
+The app supports **English** (`en`) and **Brazilian Portuguese** (`pt-BR`). Locale is stored
+per device in `localStorage` under `minigames-locale`. On first visit, a language picker
+modal blocks the app until the user chooses.
+
+### Architecture
+
+- **Catalogs**: [`shared/i18n/en.ts`](shared/i18n/en.ts) and [`shared/i18n/pt-BR.ts`](shared/i18n/pt-BR.ts)
+- **Core API**: `t(locale, key, params?)`, `getGameMeta()`, `getFtpPrompt()`, `getWyrQuestion()`
+  in [`shared/i18n/index.ts`](shared/i18n/index.ts)
+- **Frontend**: `I18nProvider` + `useTranslation()` hook; all UI strings use `t('dotted.key')`
+- **Backend errors**: emit `{ code: 'ERROR_CODE' }` — client translates via `errors.ERROR_CODE`
+- **Game content**: server sends stable keys (`promptKey`, `questionKey`); client resolves text
+
+### Adding New UI Strings
+
+1. Add the key to **both** `shared/i18n/en.ts` and `shared/i18n/pt-BR.ts`
+2. Use `const { t } = useTranslation()` in the component
+3. Interpolation: `t('common.secondsRemaining', { count: 12 })` → `{{count}}` in catalog
+
+### Adding New Game Content (prompts, questions)
+
+1. Add key to `shared/i18n/keys.ts` (e.g. `FTP_PROMPT_KEYS`, `WYR_QUESTION_KEYS`)
+2. Add translations under `games.<gameId>.prompts.<key>` or `.questions.<key>`
+3. Backend picks a key and sends it in `getState()` — never send localized prose from server
+4. Frontend resolves with `getFtpPrompt(locale, key)` or `getWyrQuestion(locale, key)`
+
+### Game Metadata (name, description)
+
+Translate on the client with `getGameMeta(locale, gameId)` — do not display raw
+`MiniGameConfig.name` from the server in the lobby UI.
+
+### Checklist for New Games
+
+- [ ] UI strings added to both locale files
+- [ ] Game `name` / `description` / `title` keys under `games.<id>`
+- [ ] Dynamic content uses keys in server state, not English strings
+- [ ] Error codes (if any new ones) added to both locale files
+
+---
+
 ## State Management
 
 ### Socket.IO Service Pattern
@@ -1156,6 +1198,7 @@ Before committing major changes:
 - [ ] Updated PROJECT-SPEC.md with new features/architecture
 - [ ] Updated DEVELOPMENT-GUIDE.md with new patterns/practices
 - [ ] Documented completed games in `jogos-feitos.md` (moved from `jogos-pra-criar.md`)
+- [ ] New strings added to both `shared/i18n/en.ts` and `shared/i18n/pt-BR.ts`
 - [ ] Updated README.md if user-facing changes
 - [ ] Added code examples for new patterns
 - [ ] Updated type definitions and interfaces
