@@ -6,6 +6,7 @@ import {
   GameAction,
   GameState,
 } from "../../../shared/types";
+import { WYR_QUESTION_KEYS } from "../../../shared/i18n";
 
 const config: MiniGameConfig = {
   id: "would_you_rather",
@@ -16,27 +17,8 @@ const config: MiniGameConfig = {
   estimatedDuration: 30,
 };
 
-// Questions database
-const QUESTIONS = [
-  { optionA: "Have super strength", optionB: "Have the ability to fly" },
-  { optionA: "Be able to read minds", optionB: "Be able to become invisible" },
-  { optionA: "Live without internet", optionB: "Live without AC/heating" },
-  { optionA: "Always be 10 minutes late", optionB: "Always be 20 minutes early" },
-  { optionA: "Have no taste buds", optionB: "Be color blind" },
-  { optionA: "Have a photographic memory", optionB: "Have the ability to forget anything" },
-  { optionA: "Be famous but hated", optionB: "Be unknown but loved" },
-  { optionA: "Have perfect teeth", optionB: "Have perfect hair" },
-  { optionA: "Be able to speak all languages", optionB: "Be able to play all instruments" },
-  { optionA: "Have unlimited money", optionB: "Have unlimited time" },
-  { optionA: "Live in a world without music", optionB: "Live in a world without colors" },
-  { optionA: "Have the ability to time travel", optionB: "Have the ability to teleport" },
-  { optionA: "Be able to talk to animals", optionB: "Be able to talk to plants" },
-  { optionA: "Have no friends", optionB: "Have no family" },
-  { optionA: "Be able to control fire", optionB: "Be able to control water" },
-];
-
 interface WouldYouRatherState {
-  question: { optionA: string; optionB: string } | null;
+  questionKey: string | null;
   votes: Map<string, "A" | "B">;
   status: "waiting" | "voting" | "results" | "ended";
   voteCountdown: number;
@@ -51,7 +33,7 @@ export class WouldYouRatherGame implements MiniGameEngine {
   config = config;
   private players: Player[] = [];
   private state: WouldYouRatherState = {
-    question: null,
+    questionKey: null,
     votes: new Map(),
     status: "waiting",
     voteCountdown: 0,
@@ -61,11 +43,11 @@ export class WouldYouRatherGame implements MiniGameEngine {
 
   initialize(players: Player[]): void {
     this.players = players;
-    const randomQuestion =
-      QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+    const questionKey =
+      WYR_QUESTION_KEYS[Math.floor(Math.random() * WYR_QUESTION_KEYS.length)];
 
     this.state = {
-      question: randomQuestion,
+      questionKey,
       votes: new Map(),
       status: "voting",
       voteCountdown: 15, // 15 seconds to vote
@@ -158,7 +140,7 @@ export class WouldYouRatherGame implements MiniGameEngine {
   getState(): GameState {
     return {
       status: this.state.status,
-      question: this.state.question,
+      questionKey: this.state.questionKey,
       votes: Array.from(this.state.votes.entries()),
       voteCountdown: this.state.voteCountdown,
       results: this.state.results,
@@ -182,7 +164,7 @@ export class WouldYouRatherGame implements MiniGameEngine {
       return {
         winnerId,
         stats: {
-          question: this.state.question,
+          questionKey: this.state.questionKey,
           results: this.state.results,
           totalVotes: this.state.votes.size,
         },
@@ -203,7 +185,7 @@ export class WouldYouRatherGame implements MiniGameEngine {
     }
 
     this.state = {
-      question: null,
+      questionKey: null,
       votes: new Map(),
       status: "waiting",
       voteCountdown: 0,

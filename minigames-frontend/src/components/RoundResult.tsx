@@ -1,7 +1,8 @@
 import type {
   RoundResult as RoundResultType,
   Player,
-} from "../../../shared/types";
+} from "shared/types";
+import { useTranslation } from "../i18n/I18nContext";
 import "./RoundResult.css";
 
 interface RoundResultProps {
@@ -19,11 +20,11 @@ export function RoundResult({
   onNextRound,
   onEndSession,
 }: RoundResultProps) {
+  const { t } = useTranslation();
   const noWinner = result.stats.noWinner === true;
   const winner = players.find((p) => p.id === result.winnerId);
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
-  // Type guard for responses
   const responses = result.stats.responses as
     | Record<string, number>
     | undefined;
@@ -32,13 +33,13 @@ export function RoundResult({
   return (
     <div className="round-result-overlay">
       <div className="round-result-card">
-        <h1 className="result-title">Round Complete!</h1>
+        <h1 className="result-title">{t("roundResult.title")}</h1>
 
         <div className="winner-section">
           {noWinner ? (
             <div className="winner-info">
-              <h2 className="winner-name">Nobody wins this round</h2>
-              <p className="winner-label">Scores unchanged</p>
+              <h2 className="winner-name">{t("roundResult.nobodyWins")}</h2>
+              <p className="winner-label">{t("roundResult.scoresUnchanged")}</p>
             </div>
           ) : (
             <>
@@ -50,7 +51,7 @@ export function RoundResult({
                     style={{ backgroundColor: winner.color }}
                   />
                   <h2 className="winner-name">{winner.username}</h2>
-                  <p className="winner-label">wins this round!</p>
+                  <p className="winner-label">{t("roundResult.winsRound")}</p>
                 </div>
               )}
             </>
@@ -58,7 +59,7 @@ export function RoundResult({
         </div>
 
         <div className="round-stats">
-          <h3>Round Stats</h3>
+          <h3>{t("roundResult.roundStats")}</h3>
           {hasResponses && (
             <div className="response-times">
               {Object.entries(responses).map(([playerId, time]) => {
@@ -73,7 +74,9 @@ export function RoundResult({
                     />
                     <span className="response-name">{player.username}</span>
                     <span className="response-time">
-                      {time === -1 ? "Too early!" : `${time}ms`}
+                      {time === -1
+                        ? t("roundResult.tooEarly")
+                        : t("roundResult.responseMs", { time })}
                     </span>
                   </div>
                 );
@@ -83,7 +86,7 @@ export function RoundResult({
         </div>
 
         <div className="scoreboard">
-          <h3>Current Scores</h3>
+          <h3>{t("roundResult.currentScores")}</h3>
           <div className="score-list">
             {sortedPlayers.map((player, index) => (
               <div key={player.id} className="score-item">
@@ -102,18 +105,16 @@ export function RoundResult({
         {isHost && (
           <div className="host-round-actions">
             <button className="next-round-button" onClick={onNextRound}>
-              Next Round
+              {t("roundResult.nextRound")}
             </button>
             <button className="end-session-button-card" onClick={onEndSession}>
-              Back to Lobby
+              {t("roundResult.backToLobby")}
             </button>
           </div>
         )}
 
         {!isHost && (
-          <p className="waiting-text">
-            Waiting for host to start next round...
-          </p>
+          <p className="waiting-text">{t("roundResult.waitingForHost")}</p>
         )}
       </div>
     </div>

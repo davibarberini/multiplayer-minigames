@@ -7,10 +7,10 @@ import type {
   RoundResult,
   MiniGameConfig,
   GameAction,
-} from "../../../shared/types";
+} from "shared/types";
 
 const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL || "http://192.168.68.107:3001";
+  import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
 
 export function useSocket() {
   const [lobby, setLobby] = useState<Lobby | null>(null);
@@ -18,7 +18,10 @@ export function useSocket() {
   const [gameData, setGameData] = useState<GameStartData | null>(null);
   const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
   const [gameWinner, setGameWinner] = useState<Player | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    code?: string;
+    message?: string;
+  } | null>(null);
   const [connected, setConnected] = useState(false);
   const [availableGames, setAvailableGames] = useState<MiniGameConfig[]>([]);
   const [publicLobbies, setPublicLobbies] = useState<Lobby[]>([]);
@@ -104,9 +107,9 @@ export function useSocket() {
       );
     });
 
-    socket.on("error", ({ message }) => {
-      setError(message);
-      console.error("Socket error:", message);
+    socket.on("error", (payload) => {
+      setError(payload);
+      console.error("Socket error:", payload);
     });
 
     return () => {

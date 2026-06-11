@@ -2,7 +2,7 @@ import { io, Socket } from "socket.io-client";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
-} from "../../../shared/types";
+} from "shared/types";
 
 class SocketService {
   private socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =

@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { PLAYER_COLORS } from "../../../shared/constants";
+import { PLAYER_COLORS } from "shared/constants";
+import { useTranslation } from "../i18n/I18nContext";
+import { LanguagePicker } from "./LanguagePicker";
 import "./Landing.css";
 
 interface LandingProps {
   onCreateLobby: (username: string, color: string) => void;
   onJoinLobby: (code: string, username: string, color: string) => void;
   onBrowseLobbies: () => void;
-  error: string | null;
+  error: { code?: string; message?: string } | null;
 }
 
 export function Landing({
@@ -15,12 +17,20 @@ export function Landing({
   onBrowseLobbies,
   error,
 }: LandingProps) {
+  const { t, locale } = useTranslation();
   const [username, setUsername] = useState("");
   const [selectedColor, setSelectedColor] = useState<
     (typeof PLAYER_COLORS)[number]
   >(PLAYER_COLORS[0]);
   const [lobbyCode, setLobbyCode] = useState("");
   const [mode, setMode] = useState<"create" | "join" | null>(null);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+
+  const errorMessage = error
+    ? error.code
+      ? t(`errors.${error.code}`)
+      : error.message
+    : null;
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,30 +50,44 @@ export function Landing({
     }
   };
 
+  if (showLanguagePicker) {
+    return (
+      <LanguagePicker onSelect={() => setShowLanguagePicker(false)} />
+    );
+  }
+
   if (mode === null) {
     return (
       <div className="landing">
         <div className="landing-card">
-          <h1 className="title">🎮 Multiplayer Mini-Games</h1>
-          <p className="subtitle">Choose your game mode</p>
+          <h1 className="title">{t("landing.title")}</h1>
+          <p className="subtitle">{t("landing.subtitle")}</p>
 
           <div className="mode-buttons">
             <button
               className="mode-button create"
               onClick={() => setMode("create")}
             >
-              🎯 Create Lobby
+              {t("landing.createLobby")}
             </button>
             <button
               className="mode-button join"
               onClick={() => setMode("join")}
             >
-              🔑 Join with Code
+              {t("landing.joinWithCode")}
             </button>
             <button className="mode-button browse" onClick={onBrowseLobbies}>
-              🌐 Browse Public Lobbies
+              {t("landing.browseLobbies")}
             </button>
           </div>
+
+          <button
+            type="button"
+            className="language-link"
+            onClick={() => setShowLanguagePicker(true)}
+          >
+            {t("landing.changeLanguage")} ({locale})
+          </button>
         </div>
       </div>
     );
@@ -73,22 +97,22 @@ export function Landing({
     <div className="landing">
       <div className="landing-card">
         <button className="back-button" onClick={() => setMode(null)}>
-          ← Back
+          {t("common.back")}
         </button>
 
         <h1 className="title">
-          {mode === "create" ? "🎮 Create Lobby" : "🚪 Join Lobby"}
+          {mode === "create" ? t("landing.createTitle") : t("landing.joinTitle")}
         </h1>
 
         <form onSubmit={mode === "create" ? handleCreate : handleJoin}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">{t("landing.username")}</label>
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              placeholder={t("landing.usernamePlaceholder")}
               maxLength={20}
               required
             />
@@ -96,13 +120,13 @@ export function Landing({
 
           {mode === "join" && (
             <div className="form-group">
-              <label htmlFor="code">Lobby Code</label>
+              <label htmlFor="code">{t("landing.lobbyCode")}</label>
               <input
                 id="code"
                 type="text"
                 value={lobbyCode}
                 onChange={(e) => setLobbyCode(e.target.value.toUpperCase())}
-                placeholder="Enter lobby code"
+                placeholder={t("landing.lobbyCodePlaceholder")}
                 maxLength={6}
                 required
               />
@@ -110,7 +134,7 @@ export function Landing({
           )}
 
           <div className="form-group">
-            <label>Choose Your Color</label>
+            <label>{t("landing.chooseColor")}</label>
             <div className="color-picker">
               {PLAYER_COLORS.map((color) => (
                 <button
@@ -121,16 +145,18 @@ export function Landing({
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setSelectedColor(color)}
-                  aria-label={`Select ${color}`}
+                  aria-label={t("common.selectColor", { color })}
                 />
               ))}
             </div>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {errorMessage && <div className="error-message">{errorMessage}</div>}
 
           <button type="submit" className="submit-button">
-            {mode === "create" ? "Create Lobby" : "Join Lobby"}
+            {mode === "create"
+              ? t("landing.submitCreate")
+              : t("landing.submitJoin")}
           </button>
         </form>
       </div>

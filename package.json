@@ -9,6 +9,7 @@
     "dev:frontend": "pnpm -C minigames-frontend dev",
     "build:backend": "pnpm -C minigames-backend build",
     "build:frontend": "pnpm -C minigames-frontend build",
+    "build:pages": "pnpm -C minigames-frontend build && touch docs/.nojekyll",
     "build:all": "pnpm build:backend && pnpm build:frontend"
   },
   "keywords": [

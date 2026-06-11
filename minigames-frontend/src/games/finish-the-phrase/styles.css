@@ -1,0 +1,288 @@
+.ftp-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 50%, #ff6b6b 100%);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.ftp-content {
+  max-width: 720px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.ftp-title {
+  text-align: center;
+  font-size: 2.4rem;
+  margin: 0 0 24px 0;
+  color: #333;
+  font-weight: 800;
+}
+
+.ftp-loading {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #666;
+  padding: 40px;
+}
+
+.ftp-prompt-card {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 2px solid #ffcc80;
+}
+
+.ftp-prompt-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e65100;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.ftp-prompt-text {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ftp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ftp-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1.1rem;
+  font-family: inherit;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.ftp-textarea:focus {
+  border-color: #f7971e;
+}
+
+.ftp-textarea:disabled {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.ftp-submit-btn {
+  align-self: flex-end;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #f7971e 0%, #ff6b6b 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ftp-submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.ftp-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.ftp-vote-instruction {
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+  margin: 0 0 20px 0;
+}
+
+.ftp-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ftp-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #fafafa;
+  border: 2px solid #e0e0e0;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.ftp-option:hover:not(:disabled) {
+  border-color: #f7971e;
+  background: #fff8e1;
+}
+
+.ftp-option.selected {
+  border-color: #f7971e;
+  background: #fff3e0;
+}
+
+.ftp-option.own {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ftp-option:disabled {
+  cursor: not-allowed;
+}
+
+.ftp-option-letter {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7971e 0%, #ff6b6b 100%);
+  color: white;
+  font-weight: 800;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.ftp-option-text {
+  font-size: 1.05rem;
+  color: #333;
+  line-height: 1.4;
+  padding-top: 6px;
+}
+
+.ftp-footer {
+  text-align: center;
+}
+
+.ftp-status,
+.ftp-hint {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0 0 10px 0;
+}
+
+.ftp-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #888;
+}
+
+.ftp-results-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin: 0 0 24px 0;
+  color: #333;
+}
+
+.ftp-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ftp-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  border: 2px solid transparent;
+}
+
+.ftp-result-item.winner {
+  background: #fff8e1;
+  border-color: #f7971e;
+}
+
+.ftp-result-text {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #333;
+  font-style: italic;
+  flex: 1;
+}
+
+.ftp-result-votes {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e65100;
+  white-space: nowrap;
+}
+
+.ftp-winner-msg {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 12px;
+  background: #d4edda;
+  color: #155724;
+  margin: 0;
+}
+
+.ftp-no-winner {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fff3cd;
+  color: #856404;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .ftp-content {
+    padding: 24px;
+  }
+
+  .ftp-title {
+    font-size: 2rem;
+  }
+
+  .ftp-prompt-text {
+    font-size: 1.2rem;
+  }
+
+  .ftp-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ftp-result-item {
+    flex-direction: column;
+  }
+}

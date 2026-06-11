@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { useSocket } from "./hooks/useSocket";
 import { socketService } from "./services/socket";
+import { useTranslation } from "./i18n/I18nContext";
 import { Landing } from "./components/Landing";
 import { Lobby } from "./components/Lobby";
 import { LobbyList } from "./components/LobbyList";
+import { LanguagePicker } from "./components/LanguagePicker";
 import { ReactionTime } from "./games/reaction-time";
 import { WouldYouRather } from "./games/would-you-rather";
 import { HigherLower } from "./games/higher-lower";
 import { NumberGuessing } from "./games/number-guessing";
+import { FinishThePhrase } from "./games/finish-the-phrase";
 import { RoundResult } from "./components/RoundResult";
 import { Victory } from "./components/Victory";
 import "./App.css";
 
 function App() {
+  const { t, ready } = useTranslation();
   const [showLobbyList, setShowLobbyList] = useState(false);
   const {
     connected,
@@ -38,6 +42,10 @@ function App() {
 
   const currentPlayerId = socketService.getSocket()?.id || "";
 
+  if (!ready) {
+    return <LanguagePicker />;
+  }
+
   const handleBrowseLobbies = () => {
     getPublicLobbies();
     setShowLobbyList(true);
@@ -52,7 +60,6 @@ function App() {
     setShowLobbyList(false);
   };
 
-  // Show victory screen if game ended
   if (gameWinner && lobby) {
     return (
       <Victory
@@ -65,7 +72,6 @@ function App() {
     );
   }
 
-  // Show round result if round ended (but game not finished)
   if (roundResult && lobby && !gameWinner) {
     const isHost = lobby.hostId === currentPlayerId;
     return (
@@ -79,7 +85,6 @@ function App() {
     );
   }
 
-  // Show game if in progress
   if (gameData && gameState && lobby?.status === "in_game") {
     const isHost = lobby.hostId === currentPlayerId;
 
@@ -104,6 +109,15 @@ function App() {
           />
         );
       }
+      if (gameData.gameId === "finish_the_phrase") {
+        return (
+          <FinishThePhrase
+            gameState={gameState}
+            onAction={sendGameAction}
+            playerId={currentPlayerId}
+          />
+        );
+      }
       return null;
     })();
 
@@ -112,7 +126,7 @@ function App() {
         <div className="game-session">
           {isHost && (
             <button className="end-session-button" onClick={endSession}>
-              Back to Lobby
+              {t("app.backToLobby")}
             </button>
           )}
           {gameView}
@@ -121,7 +135,6 @@ function App() {
     }
   }
 
-  // Show lobby list if browsing
   if (showLobbyList && !lobby) {
     return (
       <LobbyList
@@ -132,7 +145,6 @@ function App() {
     );
   }
 
-  // Show lobby if created/joined
   if (lobby && lobby.status === "waiting") {
     return (
       <Lobby
@@ -147,11 +159,10 @@ function App() {
     );
   }
 
-  // Show landing page by default
   return (
     <div className="app">
       {!connected && (
-        <div className="connection-status">Connecting to server...</div>
+        <div className="connection-status">{t("app.connecting")}</div>
       )}
       <Landing
         onCreateLobby={createLobby}
