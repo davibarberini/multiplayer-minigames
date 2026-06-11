@@ -10,7 +10,7 @@ import type {
 } from "shared/types";
 
 const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL || "http://192.168.68.107:3001";
+  import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
 
 export function useSocket() {
   const [lobby, setLobby] = useState<Lobby | null>(null);
