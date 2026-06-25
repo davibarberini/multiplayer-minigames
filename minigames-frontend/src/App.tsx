@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSocket } from "./hooks/useSocket";
 import { socketService } from "./services/socket";
 import { useTranslation } from "./i18n/I18nContext";
+import { Portal } from "./components/Portal";
 import { Landing } from "./components/Landing";
 import { Lobby } from "./components/Lobby";
 import { LobbyList } from "./components/LobbyList";
@@ -17,6 +18,9 @@ import "./App.css";
 
 function App() {
   const { t, ready } = useTranslation();
+  const [portalView, setPortalView] = useState<"portal" | "multiplayer">(
+    "portal"
+  );
   const [showLobbyList, setShowLobbyList] = useState(false);
   const {
     connected,
@@ -159,6 +163,12 @@ function App() {
     );
   }
 
+  if (portalView === "portal") {
+    return (
+      <Portal onPlayMultiplayer={() => setPortalView("multiplayer")} />
+    );
+  }
+
   return (
     <div className="app">
       {!connected && (
@@ -168,6 +178,7 @@ function App() {
         onCreateLobby={createLobby}
         onJoinLobby={joinLobby}
         onBrowseLobbies={handleBrowseLobbies}
+        onBackToPortal={() => setPortalView("portal")}
         error={error}
       />
     </div>

@@ -3,31 +3,52 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #000;
   padding: 20px;
 }
 
 .landing-card {
-  background: white;
-  border-radius: 16px;
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
   padding: 40px;
   max-width: 500px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   position: relative;
 }
 
+.portal-back-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  transition: color 0.2s;
+}
+
+.portal-back-button:hover {
+  color: #fff;
+}
+
 .title {
-  font-size: 2rem;
+  font-size: 1.6rem;
   margin: 0 0 10px 0;
   text-align: center;
-  color: #333;
+  color: #fff;
+  font-weight: 300;
+  letter-spacing: 0.06em;
 }
 
 .subtitle {
   text-align: center;
-  color: #666;
+  color: rgba(255, 255, 255, 0.45);
   margin-bottom: 30px;
+  font-size: 0.85rem;
 }
 
 .mode-buttons {
@@ -37,41 +58,45 @@
 }
 
 .mode-button {
-  padding: 20px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
+  padding: 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  color: white;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  color: #fff;
+  background: transparent;
 }
 
 .mode-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .mode-button.create {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
-.mode-button.join {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+.mode-button.create:hover {
+  background: rgba(255, 255, 255, 0.9);
 }
 
+.mode-button.join,
 .mode-button.browse {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: #1a1a1a;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  background: transparent;
 }
 
 .back-button {
   background: none;
   border: none;
-  color: #667eea;
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
   cursor: pointer;
   padding: 5px 10px;
   margin-bottom: 10px;
@@ -79,7 +104,7 @@
 }
 
 .back-button:hover {
-  color: #764ba2;
+  color: #fff;
 }
 
 .form-group {
@@ -88,24 +113,33 @@
 
 .form-group label {
   display: block;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 8px;
-  color: #333;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .form-group input {
   width: 100%;
   padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
   font-size: 1rem;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .color-picker {
@@ -128,35 +162,39 @@
 }
 
 .color-option.selected {
-  border-color: #333;
+  border-color: #fff;
   transform: scale(1.15);
 }
 
 .submit-button {
   width: 100%;
   padding: 15px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #fff;
+  color: #000;
   border: none;
-  border-radius: 12px;
+  border-radius: 2px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, background 0.2s;
 }
 
 .submit-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 80, 80, 0.3);
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 2px;
   margin-bottom: 15px;
   text-align: center;
+  font-size: 0.85rem;
 }
 
 .language-link {
@@ -164,8 +202,13 @@
   margin-top: 24px;
   background: none;
   border: none;
-  color: #667eea;
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.language-link:hover {
+  color: #fff;
 }

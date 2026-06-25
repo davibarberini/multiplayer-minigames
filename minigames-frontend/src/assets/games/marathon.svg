@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <rect width="200" height="200" fill="#0a0a0a"/>
+  <rect x="30" y="30" width="60" height="60" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.8"/>
+  <rect x="110" y="30" width="60" height="60" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <rect x="30" y="110" width="60" height="60" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <rect x="110" y="110" width="60" height="60" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.8"/>
+  <circle cx="60" cy="60" r="12" stroke="#fff" stroke-width="1.5" fill="none"/>
+  <text x="60" y="65" text-anchor="middle" fill="#fff" font-size="14" font-family="monospace">?</text>
+  <line x1="125" y1="50" x2="155" y2="50" stroke="#fff" stroke-width="2"/>
+  <line x1="125" y1="60" x2="145" y2="60" stroke="#fff" stroke-width="2" opacity="0.6"/>
+  <line x1="125" y1="70" x2="150" y2="70" stroke="#fff" stroke-width="2" opacity="0.4"/>
+  <polygon points="45,125 55,145 35,145" fill="#fff" opacity="0.7"/>
+  <polygon points="65,125 75,145 55,145" fill="#fff" opacity="0.4"/>
+  <text x="140" y="145" text-anchor="middle" fill="#fff" font-size="22" font-family="monospace" opacity="0.8">5</text>
+</svg>

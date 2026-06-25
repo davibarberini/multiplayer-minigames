@@ -8,6 +8,7 @@ interface LandingProps {
   onCreateLobby: (username: string, color: string) => void;
   onJoinLobby: (code: string, username: string, color: string) => void;
   onBrowseLobbies: () => void;
+  onBackToPortal: () => void;
   error: { code?: string; message?: string } | null;
 }
 
@@ -15,6 +16,7 @@ export function Landing({
   onCreateLobby,
   onJoinLobby,
   onBrowseLobbies,
+  onBackToPortal,
   error,
 }: LandingProps) {
   const { t, locale } = useTranslation();
@@ -60,6 +62,13 @@ export function Landing({
     return (
       <div className="landing">
         <div className="landing-card">
+          <button
+            type="button"
+            className="portal-back-button"
+            onClick={onBackToPortal}
+          >
+            {t("portal.backToPortal")}
+          </button>
           <h1 className="title">{t("landing.title")}</h1>
           <p className="subtitle">{t("landing.subtitle")}</p>
 
@@ -96,6 +105,13 @@ export function Landing({
   return (
     <div className="landing">
       <div className="landing-card">
+        <button
+          type="button"
+          className="portal-back-button"
+          onClick={onBackToPortal}
+        >
+          {t("portal.backToPortal")}
+        </button>
         <button className="back-button" onClick={() => setMode(null)}>
           {t("common.back")}
         </button>
